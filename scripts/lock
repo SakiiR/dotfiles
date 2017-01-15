@@ -1,0 +1,10 @@
+#!/bin/bash
+
+
+TMPBG=/tmp/bg.png
+
+import -silent -window root $TMPBG;
+notify-send --urgency low "Locking..."
+convert $TMPBG -scale 25% -blur 0x20 -scale 400% $TMPBG;
+composite -gravity center ~/Images/lockpng $TMPBG $TMPBG;
+i3lock -i $TMPBG --textcolor=eee8d5ff --ringcolor=07364295 --keyhlcolor=268bd295 --bshlcolor=dc322f95 --insidecolor=002b3695 --insidevercolor=268bd295 --ringvercolor=268bd295 --insidewrongcolor=dc322f95 --ringwrongcolor=dc322f95 --linecolor=07364295
