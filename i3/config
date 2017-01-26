@@ -1,5 +1,5 @@
 # Gaps
-for_window [class="^.*"] border pixel 1
+for_window [class="^.*"] border pixel 2 
 gaps inner 20
 gaps outer 20 
 
@@ -42,6 +42,9 @@ exec --no-startup-id nm-applet
 # Terminal
 bindsym $mod+Return exec termite
 
+# Thunar File Navigator
+bindsym $mod+e exec thunar
+
 # Google Chrome
 bindsym $mod+G exec google-chrome-stable
 
@@ -49,14 +52,15 @@ bindsym $mod+G exec google-chrome-stable
 exec_always --no-startup-id ~/.config/polybar/launch.sh
 
 # Lock Screen
-bindsym $mod+o exec /home/sakiir/bin/lock 
+bindsym $mod+o exec /home/sakiir/.scripts/lock 
 
 
 # Rofi
 bindsym $mod+d exec --no-startup-id rofi -show drun
+bindsym $mod+Tab exec --no-startup-id rofi -show window
 
 # Kill window
-bindsym $mod+w kill
+bindsym $mod+x kill
 
 # Change focus
 bindsym $mod+h focus left
@@ -84,6 +88,9 @@ bindsym $mod+Shift+space floating toggle
 
 # Toggle focus betseen tilling/floating
 bindsym $mod+space focus mode_toggle
+
+# Select screen to shot :p
+bindsym Print exec --no-startup-id shutter -s --output /tmp/screenshot.png -c -e
 
 # Switch workspaces
 bindsym $mod+1 workspace 1
@@ -118,18 +125,19 @@ bindsym $mod+Shift+r restart
 # Exit i3
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
+
 # Resize windows
 mode "resize" {
-        bindsym Left resize shrink width 10 px or 10 ppt
-        bindsym Down resize grow height 10 px or 10 ppt
-        bindsym Up resize shrink height 10 px or 10 ppt
-        bindsym Right resize grow width 10 px or 10 ppt
+        bindsym h resize shrink width 2 px or 2 ppt
+        bindsym j resize grow height 2 px or 2 ppt
+        bindsym k resize shrink height 2 px or 2 ppt
+        bindsym l resize grow width 2 px or 2 ppt
         bindsym Escape mode "default"
 }
 bindsym $mod+r mode "resize"
 
 # Define colors
-set $pimp	#f3eed8
+set $pimp	#d85774
 set $wesh	#d75f87
 set $back	#626262
 
