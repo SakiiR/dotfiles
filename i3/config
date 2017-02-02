@@ -22,10 +22,13 @@ new_window normal
 set $mod Mod4
 
 # Set a background
-exec_always --no-startup-id feh --bg-scale ~/Images/Wallpaper.jpg
+exec_always --no-startup-id feh --bg-scale ~/Images/sakiir_wall.png
 
 # Enable animations
-exec_always --no-startup-id compton --config ~/.config/compton/compton
+exec_always --no-startup-id compton --config ~/.config/compton/compton --shadow-exclude 'class_g = "conky"'
+
+# Conky
+exec_always --no-startup-id conky
 
 # Mouse support for floating windows
 floating_modifier $mod
