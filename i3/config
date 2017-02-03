@@ -25,7 +25,7 @@ set $mod Mod4
 exec_always --no-startup-id feh --bg-scale ~/Images/sakiir_wall.png
 
 # Enable animations
-exec_always --no-startup-id compton --config ~/.config/compton/compton --shadow-exclude 'class_g = "conky"'
+exec_always --no-startup-id compton --config ~/.config/compton/compton
 
 # Conky
 exec_always --no-startup-id conky
