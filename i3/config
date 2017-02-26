@@ -37,8 +37,8 @@ exec --no-startup-id nm-applet
 # Terminal
 bindsym $mod+shift+T exec termite
 
-# Web Browser
-bindsym $mod+shift+G exec iridium
+# Iridium
+bindsym $mod+shift+G exec chromium
 
 # Claws-Mail
 bindsym $mod+shift+S exec claws-mail
@@ -85,7 +85,7 @@ bindsym $mod+Shift+space floating toggle
 bindsym $mod+space focus mode_toggle
 
 # Screenshot
-bindsym Print exec --no-startup-id shutter -s --output /tmp/screenshot.png -c -e
+bindsym Print exec --no-startup-id ~/.config/scripts/screenshot.sh
 
 # Switch workspaces
 bindsym $mod+1 workspace 1
