@@ -25,8 +25,7 @@ margin-top = 5
 margin-bottom = 5
 
 [bar/main]
-;monitor = ${env:MONITOR:HDMI-1}
-bottom = true
+bottom = false
 width = 100%
 height = 40
 offset-x = 0
@@ -50,9 +49,9 @@ module-margin-right = 1
 font-0 = monofur for Powerline for Powerline:pixelsize=16;0
 font-1 = FontAwesome:pixelsize=16;-2
 
-modules-left = bspwm i3 xwindow
+modules-left = i3 xwindow
 modules-center =
-modules-right = s sakiir s mpd myVolume s wlan eth s memory cpu myLoad temperature s battery s date 
+modules-right = s myVolume s wlan s myLoad temperature s myBattery s date 
 
 tray-position = right
 tray-padding = 2
@@ -66,11 +65,7 @@ label-background = ${colors.background-alt}
 label-padding = 2
 format-underline = ${colors.high}
 
-[module/xkeyboard]
-type = internal/xkeyboard
-blacklist-0 = num lock
-
-format-underline = ${colors.secondary}
+;format-underline = ${colors.secondary}
 format-prefix = " "
 format-prefix-foreground = ${colors.foreground-alt}
 
@@ -79,10 +74,6 @@ label-layout = %layout%
 label-indicator-padding = 2
 label-indicator-background = ${colors.secondary}
 label-indicator-underline = ${colors.secondary}
-
-[module/bspwm]
-type = internal/bspwm
-ws-icon-default = x
 
 label-focused = %index%
 label-focused-background = ${colors.background-alt}
@@ -149,36 +140,6 @@ format-discharging-padding = ${module/theme.format-padding}
 format-mounted-foreground = ${self.format-mounted-underline}
 format-unmounted-foreground = ${self.format-unmounted-underline}
 
-[module/mpd]
-type = internal/mpd
-
-inherit = module/theme
-
-format-online = <toggle>   <label-song>    [ <label-time>  ]
-
-label-song = %title% - %artist%
-label-song-maxlen = 25
-label-song-ellipsis = true
-
-icon-prev = 
-icon-seekb = 
-icon-stop = 
-icon-play = 
-icon-pause = 
-icon-next = 
-icon-seekf = 
-
-icon-random = 
-icon-repeat = 
-
-;toggle-on-foreground = ${colors.primary}
-;toggle-off-foreground = #66
-
-;format-online-prefix = " "
-format-online-underline = #20dfdf
-format-online-background = #0d5959
-format-online-padding = 4
-
 [module/myBattery]
 interval=1
 type = custom/script
@@ -210,48 +171,10 @@ exec = /usr/lib/i3blocks/load_average
 click-left = urxvt -name float -e htop &
 format-underline = #d33636
 
-[module/systemRoot]
-inherit = module/theme
-type = internal/fs
-interval = 20
-mount-0 = /
-label-mounted = " %free%"
-label-unmounted = " ??"
-format-mounted-underline = #39c639
-format-unmounted-underline = #39c639
-
-[module/systemHome]
-inherit = module/theme
-type = internal/fs
-interval = 20
-format-prefix = ""
-mount-0 = /home
-label-mounted = " %free%"
-label-unmounted = " ??"
-format-mounted-underline = #39c639
-format-unmounted-underline = #39c639
-
-[module/backlight]
-type = internal/xbacklight
-
-format = <label> <bar>
-label = BL
-
-bar-width = 10
-bar-indicator = │
-bar-indicator-foreground = #ff
-bar-indicator-font = 2
-bar-fill = ─
-bar-fill-font = 2
-bar-fill-foreground = #9f78e1
-bar-empty = ─
-bar-empty-font = 2
-bar-empty-foreground = ${colors.foreground-alt}
-
 [module/wlan]
 inherit = module/theme
 type = internal/network
-interface = wlo1
+interface = wlp16s0
 interval = 1
 
 format-connected = <label-connected>
@@ -259,7 +182,7 @@ format-connected-underline = #268bd2
 format-disconnected-underline = ${colors.alert}
 
 ;label-connected = " %local_ip% %signal% %downspeed% %upspeed%"
-label-connected = " %signal% [  %downspeed% ] [  %upspeed% ]"
+label-connected = " %signal%  %downspeed% %upspeed% "
 label-disconnected = "OFFLINE"
 label-connected-foreground = ${colors.high}
 label-disconnected-foreground = ${colors.alert}
@@ -274,7 +197,7 @@ ramp-signal-foreground = ${colors.foreground-alt}
 [module/eth]
 inherit = module/theme
 type = internal/network
-interface = eth0
+interface = enp3s0
 interval = 3.0
 
 format-connected-underline = #55aa55
@@ -291,79 +214,13 @@ inherit = module/theme
 type = internal/date
 interval = 1
 
-time = "%a - %d.%m.%Y - %H:%M:%S"
+time = "%a - %d.%m - %H:%M"
 time-alt = "%a - %d.%m.%Y - %I:%M %p"
 
 format-prefix = " "
 format-underline = ${colors.foreground}
 
 label = %date% %time%
-
-[module/volume]
-inherit = module/theme
-type = internal/volume
-
-format-volume = <label-volume> <bar-volume>
-label-volume = VOL
-label-volume-foreground = ${root.foreground}
-
-format-muted-prefix = " "
-format-muted-foreground = ${colors.foreground-alt}
-label-muted = sound muted
-
-bar-volume-width = 10
-bar-volume-foreground-0 = #55aa55
-bar-volume-foreground-1 = #55aa55
-bar-volume-foreground-2 = #55aa55
-bar-volume-foreground-3 = #55aa55
-bar-volume-foreground-4 = #55aa55
-bar-volume-foreground-5 = #f5a70a
-bar-volume-foreground-6 = #ff5555
-bar-volume-gradient = false
-bar-volume-indicator = │
-bar-volume-indicator-font = 2
-bar-volume-indicator-foreground = #ff
-bar-volume-fill = ─
-bar-volume-fill-font = 2
-bar-volume-empty = ─
-bar-volume-empty-font = 2
-bar-volume-empty-foreground = ${colors.foreground-alt}
-
-[module/battery]
-inherit = module/theme
-type = internal/battery
-battery = BAT0
-adapter = ADP1
-full-at = 98
-
-label-charging = " %percentage% [%time%]"
-format-charging = <animation-charging> <label-charging>
-format-charging-underline = #ffb52a
-
-label-discharging = "%percentage% [%time%]"
-format-discharging = <ramp-capacity> <label-discharging>
-format-discharging-underline = ${self.format-charging-underline}
-
-label-charging-foreground = ${self.format-charging-underline}
-label-discharging-foreground = ${self.format-charging-underline}
-
-format-full-prefix = " "
-format-full-prefix-foreground = ${colors.foreground-alt}
-format-full-underline = ${self.format-charging-underline}
-
-ramp-capacity-0 = 
-ramp-capacity-1 = 
-ramp-capacity-2 = 
-ramp-capacity-3 = 
-ramp-capacity-4 = 
-ramp-capacity-foreground = ${self.format-charging-underline}
-ramp-capacity-0-foreground = ${colors.foreground}
-ramp-capacity-0-background = ${colors.alert}
-
-animation-charging-0 = 
-animation-charging-1 = 
-animation-charging-foreground = ${self.format-charging-underline}
-animation-charging-framerate = 750
 
 [module/temperature]
 inherit = module/theme
@@ -390,7 +247,3 @@ ramp-foreground = ${colors.foreground-alt}
 [module/s]
 type = custom/text
 content = " "
-
-[module/sakiir]
-type = custom/text
-content = "SakiiR Security"
