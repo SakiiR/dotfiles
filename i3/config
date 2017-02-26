@@ -1,7 +1,7 @@
 # Gaps
-for_window [class="^.*"] border pixel 2 
-gaps inner 20
-gaps outer 20 
+for_window [class="^.*"] border pixel 3
+gaps inner 5
+gaps outer 5 
 
 # My floating friends
 for_window [window_role="pop-up"] floating enable
@@ -9,11 +9,9 @@ for_window [class="imv"] floating enable
 for_window [class="Thunar"] floating enable
 for_window [class="File-roller"] floating enable
 for_window [class="Vlc"] floating enable
-for_window [class="Corebird"] floating enable
-for_window [class="Wine"] floating enable
 
 # Font
-font pango: Inconsolata-g 11
+font pango: Inconsolata-g 14
 
 # Borders
 new_window normal
@@ -22,19 +20,13 @@ new_window normal
 set $mod Mod4
 
 # Set a background
-exec_always --no-startup-id feh --bg-scale ~/Images/sakiir_wall.png
-
-# Enable animations
-exec_always --no-startup-id compton --config ~/.config/compton/compton
-
-# Conky
-exec_always --no-startup-id conky
+exec_always --no-startup-id feh --bg-scale ~/Images/Wallpaper.jpg
 
 # Mouse support for floating windows
 floating_modifier $mod
 
 # No mouse focus
-focus_follows_mouse none
+focus_follows_mouse yes
 
 # Dunst
 exec --no-startup-id dunst -config ~/.dunstrc
@@ -43,19 +35,19 @@ exec --no-startup-id dunst -config ~/.dunstrc
 exec --no-startup-id nm-applet
 
 # Terminal
-bindsym $mod+Return exec termite
+bindsym $mod+shift+T exec termite
 
-# Thunar File Navigator
-bindsym $mod+e exec thunar
+# Web Browser
+bindsym $mod+shift+G exec iridium
 
-# Google Chrome
-bindsym $mod+G exec google-chrome-stable
+# Claws-Mail
+bindsym $mod+shift+S exec claws-mail
 
 # Polybar
 exec_always --no-startup-id ~/.config/polybar/launch.sh
 
 # Lock Screen
-bindsym $mod+o exec /home/sakiir/.scripts/lock 
+bindsym $mod+o exec ~/.config/scripts/lock 
 
 
 # Rofi
@@ -63,7 +55,7 @@ bindsym $mod+d exec --no-startup-id rofi -show drun
 bindsym $mod+Tab exec --no-startup-id rofi -show window
 
 # Kill window
-bindsym $mod+x kill
+bindsym $mod+q kill
 
 # Change focus
 bindsym $mod+h focus left
@@ -92,7 +84,7 @@ bindsym $mod+Shift+space floating toggle
 # Toggle focus betseen tilling/floating
 bindsym $mod+space focus mode_toggle
 
-# Select screen to shot :p
+# Screenshot
 bindsym Print exec --no-startup-id shutter -s --output /tmp/screenshot.png -c -e
 
 # Switch workspaces
@@ -152,10 +144,23 @@ client.urgent		$wesh	$wesh	$wesh	$wesh	$wesh
 client.placeholder	$back	$back	$back	$back	$back
 client.background	$back
 
-# Brightness fn keys
-bindsym XF86MonBrightnessDown exec --no-startup-id "light -U 5"
-bindsym XF86MonBrightnessUp exec --no-startup-id "light -A 5"
+set $Locker i3lock && sleep 1
 
-# Sound fn keys
-bindsym XF86AudioLowerVolume exec --no-startup-id "/home/sakiir/.scripts/decVolume.sh"
-bindsym XF86AudioRaiseVolume exec --no-startup-id "/home/sakiir/.scripts/incVolume.sh"
+set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
+mode "$mode_system" {
+    bindsym l exec --no-startup-id $Locker, mode "default"
+    bindsym e exec --no-startup-id i3-msg exit, mode "default"
+    bindsym s exec --no-startup-id $Locker && systemctl suspend, mode "default"
+    bindsym h exec --no-startup-id $Locker && systemctl hibernate, mode "default"
+    bindsym r exec --no-startup-id systemctl reboot, mode "default"
+    bindsym Shift+s exec --no-startup-id systemctl poweroff -i, mode "default"  
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+bindsym $mod+Shift+p mode "$mode_system"
+
+bindsym $mod+Shift+Up exec --no-startup-id "~/.config/scripts/incVolume.sh"
+bindsym $mod+Shift+Down exec --no-startup-id "~/.config/scripts/decVolume.sh"
