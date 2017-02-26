@@ -1,5 +1,6 @@
 #!/bin/bash
 
 amixer -q sset Master 3%-
-notify-send -t 100 $(sh /home/sakiir/.scripts/getvolume)
+aplay ~/.config/scripts/vol.wav
+notify-send -t 100 $(sh ~/.config/scripts/getvolume)
 
