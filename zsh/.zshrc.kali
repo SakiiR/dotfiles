@@ -1,0 +1,227 @@
+export ZSH="/root/.oh-my-zsh"
+
+ZSH_THEME="norm"
+
+DISABLE_UPDATE_PROMPT="true"
+
+DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+plugins=(git vi-mode zsh-syntax-highlighting)
+
+source $ZSH/oh-my-zsh.sh
+
+# Adds `code` cli to open files/folders in vscode
+export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+
+# Disable python SSL URLLIB warnings
+export PYTHONWARNINGS="ignore:Unverified HTTPS request"
+
+# FZF configuration
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Language
+export LANG=fr_FR.UTF-8
+
+# Editor
+export EDITOR='nvim'
+
+# Pyenv init
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+
+# Go Path configuration
+export GOPATH=$HOME/go
+
+# Add Go binaries
+export PATH=$HOME/.cargo/bin/:$PATH
+
+# Add Go binaries
+export PATH=$HOME/go/bin:$PATH
+
+# OpenSSL binaries
+export PATH="/usr/local/opt/openssl/bin:$PATH"
+
+# Aliases
+alias ls="exa"
+alias l="ls -lA"
+alias e="code"
+alias ls="exa"
+alias cat="bat --theme=TwoDark"
+alias lsa="exa -a"
+alias l="exa -lahHiu --git --icons"
+alias lt="exa -lahHiu --git -T --icons"
+alias lr="exa -lahHiu --git -R --icons"
+alias md="mkdir -p"
+alias clip='pbcopy'
+alias py='python'
+alias dc="docker-compose"
+alias http='http --verify=no'
+alias https='http --default-scheme=https --verify=no'
+alias fuzz='ffuf -H "User-Agent: pentest" -of html -t 1 -c -bc all'
+alias weather="curl wttr.in"
+alias random="head -c 8 /dev/urandom | rax2 -S"
+
+
+# Functions
+
+update_prompt() {
+  source $HOME/.zshrc
+}
+
+timezsh() {
+  shell=${1-$SHELL}
+  for i in $(seq 1 50); do /usr/bin/time $shell -i -c exit; done
+}
+
+
+pyenv_init() {
+  eval "$(pyenv init -)"
+}
+
+proxy() {
+  export HTTP_PROXY=localhost:8080
+  export HTTPS_PROXY=localhost:8080
+  export http_proxy=localhost:8080
+  export https_proxy=localhost:8080
+  update_prompt
+}
+
+
+unproxy() {
+  unset HTTP_PROXY
+  unset HTTPS_PROXY
+  unset http_proxy
+  unset https_proxy
+  update_prompt
+}
+
+nmapFast() {
+  if [[ -z $1 ]] ; then
+    echo "USAGE: nmapFast IP/Domain"
+    return
+  fi
+
+  item=$1
+
+  echo " +++ "
+  echo "[±] Starting Fast Nmap Scan for $item"
+  echo " +++ "
+
+  nmap -vvv -n -sV --reason -Pn --version-intensity=3 --top-ports=1000 -oA "${item}_fast" "$item"
+}
+
+
+nmapFastScript() {
+  if [[ -z $1 ]] ; then
+    echo "USAGE: nmapFast IP/Domain"
+    return
+  fi
+
+  item=$1
+
+  echo " +++ "
+  echo "[±] Starting Fast Nmap Scan for $item"
+  echo " +++ "
+
+  nmap -vvv -n -sC -sV --reason -Pn --version-intensity=3 --top-ports=1000 -oA "${item}_script" "$item"
+}
+
+
+nmapFull() {
+  if [[ -z $1 ]] ; then
+    echo "USAGE: nmapFull IP/Domain"
+    return
+  fi
+
+  item=$1
+
+  echo " +++ "
+  echo "[±] Starting Full Nmap Scan for $item"
+  echo " +++ "
+
+  sudo nmap -vvv -n -sSV --reason -Pn --version-intensity=9 -p- -oA "${item}_full" "$item"
+}
+
+nmapUDP() {
+  if [[ -z $1 ]] ; then
+    echo "USAGE: nmapUDP IP/Domain"
+    return
+  fi
+
+  item=$1
+
+  echo " +++ "
+  echo "[±] Starting UDP Nmap Scan for $item"
+  echo " +++ "
+
+  sudo nmap -vvv -n -sUV --reason -Pn -p 43,53,67,68,111,137,138,139,161,500,1434,1604 -oA "${item}_udp_full" "$item"
+}
+
+nmapTopTCP() {
+
+  if [[ -z $1 ]] ; then
+    echo "USAGE: nmapTopTCP IP/Domain"
+    return
+  fi
+
+  item=$1
+
+  echo " +++ "
+  echo "[±] Starting Top TCP Nmap Scan for $item"
+  echo " +++ "
+
+  sudo nmap -vvv -n -sSV -reason -Pn -p 0,7,21,22,23,25,53,79,80,81,82,83,84,85,86,87,88,89,90,111,137,138,139,379,389,390,443,445,446,513,514,548,623,631,636,843,873,902,990,1098,1099,1194,1352,1414,1433,1443,1521,1522,1523,1524,1525,1526,1527,1528,1529,1530,1583,1723,1812,1883,2000,2006,2049,2082,2083,2086,2100,2106,2156,2205,2224,2301,2376,2381,2638,3000,3050,3128,3200,3260,3268,3269,3299,3306,3310,3351,3389,3466,3480,3632,3668,3690,4001,4280,4343,4443,4679,4711,4743,4750,4848,4949,5000,5001,5005,5006,5353,5432,5433,5445,5555,5601,5666,5672,5869,5900,5901,5984,5985,5986,6000,6001,6002,6003,6004,6005,6006,6007,6008,6009,6060,6061,6112,6129,6161,6262,6379,6690,7001,7002,7080,7183,7272,7474,7670,7676,7779,8000,8001,8006,8009,8019,8020,8080,8081,8082,8083,8084,8089,8090,8161,8162,8181,8282,8300,8400,8443,8471,8500,8501,8834,8880,8887,8888,8980,9000,9012,9042,9043,9060,9080,9081,9090,9091,9200,9300,9400,9418,9443,9471,9495,9704,9788,9875,9997,9998,10000,10443,11211,11311,12174,13131,16102,16200,17988,17990,19200,27017,27018,27019,28017,32764,35357,38292,41080,41443,50000,50001,50002,50003,50004,50005,50006,50007,50008,50009,50010,50080,50100,61616 -oA "${item}_top_tcp" "$item"
+}
+
+
+d () {
+  date +"%Y-%d-%h_%T"
+}
+
+
+imgcpy () {
+  if [ $# -lt 2 ]; then
+    echo "No arguments supplied"
+    return
+  fi
+
+  FILE="$1"
+
+
+  if  [[ ! -f "$FILE" ]] ; then
+    echo "File $FILE does not exist"
+    return
+  fi
+
+  TITLE=$(echo -ne $2 | tr -c '[:alnum:]._-' '_')
+  DATE=$(d)
+  EXT=${FILE##*.}
+
+  NEW_FILE_PATH="./$DATE"_"$TITLE.copy.$EXT"
+  cp -f "$FILE" "$NEW_FILE_PATH"
+  echo $NEW_FILE_PATH
+
+  NEW_FILE_PATH="./$DATE"_"$TITLE.$EXT"
+  cp -f "$FILE" "$NEW_FILE_PATH"
+  echo $NEW_FILE_PATH
+}
+
+transfer() { if [ $# -eq 0 ]; then echo -e "No arguments specified. Usage:\necho transfer /tmp/test.md\ncat /tmp/test.md | transfer test.md"; return 1; fi
+tmpfile=$( mktemp -t transferXXX ); if tty -s; then basefile=$(basename "$1" | sed -e 's/[^a-zA-Z0-9._-]/-/g'); curl --progress-bar --upload-file "$1" "https://transfer.sh/$basefile" >> $tmpfile; else curl --progress-bar --upload-file "-" "https://transfer.sh/$1" >> $tmpfile ; fi; cat $tmpfile; rm -f $tmpfile; }
+
+
+setcwd () {
+  CWDFILE="/tmp/.cwd"
+  rm -f "$CWDFILE"
+
+  echo -n "$(pwd)" > "$CWDFILE"
+}
+
+cwd () {
+  CWDFILE="/tmp/.cwd"
+  CWD=$(cat $CWDFILE)
+  cd "$CWD"
+}

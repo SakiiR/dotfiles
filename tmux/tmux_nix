@@ -1,0 +1,104 @@
+# Terminal
+set -g default-terminal "screen-256color"
+
+# Vi style keys
+set -g mode-keys vi
+bind Enter copy-mode
+bind P paste-buffer
+bind-key -T copy-mode-vi 'v' send -X begin-selection
+bind-key -T copy-mode-vi 'y' send -X copy-selection-and-cancel
+
+# No latency
+# Neovim likes this
+set -g escape-time 0
+
+# Mouse
+set -g mouse on
+
+# Remap master key
+# C-b --> C-a
+unbind C-b
+set -g prefix C-a
+
+# Split panes
+unbind '"'
+unbind %
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+
+# Creation on current directoy
+bind c new-window -c "#{pane_current_path}"
+
+# Panes switch
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# Panes Resizing
+bind -r H resize-pane -L 2
+bind -r J resize-pane -D 2
+bind -r K resize-pane -U 2
+bind -r L resize-pane -R 2
+
+# ...........
+# Clipboard
+# ...........
+# copy to X11 clipboard
+#if -b 'command -v xsel > /dev/null 2>&1' 'bind y run -b "tmux save-buffer - | xsel -i -b"'
+#if -b '! command -v xsel > /dev/null 2>&1 && command -v xclip > /dev/null 2>&1' 'bind y run -b "tmux save-buffer - | xclip -i -selection clipboard >/dev/null 2>&1"'
+set-option -s set-clipboard off
+bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -se c -i"
+
+
+# Replace list-session by choose-tree
+unbind s
+bind s choose-tree
+
+# Replace informations by (i)nitialize new session
+unbind i
+bind i new-session
+
+# Show/hide bar
+bind space set -g status
+# And hide it by default
+# set -g status off
+
+# Bar on the top sometimes
+set-option -g status-position top
+
+# Bar colors
+set -g status-fg black
+set -g status-bg black
+
+# Relative index starts @ one
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Bar display
+# Window name
+setw -g window-status-format '#[fg=brightblack]| #W#[fg=default]'
+# Window name and active indicator
+setw -g window-status-current-format '#[fg=brightblack]| #[fg=default]#[fg=red]#W#[fg=default]'
+
+# Left
+# Sessions name
+set -g status-left "#[fg=green,bold]#S#[fg=default,nobold] "
+
+# Right
+# Display user informationk
+set -g status-right "#[fg=brightblack]#(battery -e -a | cut -d "[" -f2 | cut -d "]" -f1) | %d/%m/%y | %H:%M | #[fg=blue]#(tmux ls | wc -l | tr -d ' ')#[fg=brightblack] sess.#[fg=default]"
+
+# Separators colors
+set -g pane-active-border-style fg=colour240
+set -g pane-border-style fg=colour240
+
+# No automatic rename
+set -g allow-rename off
+
+# Rename shortcut
+bind r command-prompt 'rename-window %%'
+
+
+# Reload configuration quickly
+bind R source-file ~/.tmux.conf
