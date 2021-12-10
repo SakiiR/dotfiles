@@ -1,0 +1,19 @@
+add_newline = true
+
+[character]                            # The name of the module we are configuring is "character"
+success_symbol = "[➜](bold green)"     # The "success_symbol" segment is being set to "➜" with the color "bold green"
+
+[package]
+disabled = true
+
+[aws]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[python]
+python_binary = ["python"]
+pyenv_version_name = false
+detect_extensions = []
+
