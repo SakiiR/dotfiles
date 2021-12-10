@@ -1,0 +1,127 @@
+
+"Plugins
+"Managed via vim-plug
+"Use :PlugInstall / :PlugClean
+"Use :PlugUpdate / :PlugUpgrade
+call plug#begin('~/.vim/plugged')
+
+Plug 'ayu-theme/ayu-vim' " or other package manager
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
+
+" Some colorscheme
+call plug#end()
+
+" Add GFX :p
+let g:neovide_cursor_vfx_mode = "railgun"
+let g:neovide_transparency = 0.8
+
+" Enable airline
+let g:airline#extensions#tabline#enabled = 1
+let g:airline_powerline_fonts = 1
+
+" Colors
+set termguicolors     " enable true colors support
+"let ayucolor="light"  " for light version of theme
+"let ayucolor="mirage" " for mirage version of theme
+let ayucolor="dark"   " for dark version of theme
+colorscheme ayu
+
+" Font
+set guifont=Monofur\ Nerd\ Font:16
+
+" Airline theme
+let g:airline_theme='bubblegum'
+
+set relativenumber
+
+"Remap leader
+let mapleader=";"
+
+"Change shell (env variable)
+let $SHELL = '/bin/sh'
+
+"Splits
+"Use :s and :v
+cabbrev s split
+cabbrev v vsplit
+
+"Search
+"Search as you type
+"Highlight results
+"Ignore case
+set incsearch
+set hlsearch
+set ignorecase
+
+"Avoid useless redraw
+set lazyredraw
+
+"Ignore some extensions in wildmenu
+set wildignore+=*.so,*.o,*.swp
+
+"Remap escape
+"jj is always near
+inoremap jj <Esc>
+
+"Remap page moves
+"Avoid scrolling one line by one line
+noremap <C-J> }
+noremap <C-K> {
+
+"Syntax processing
+syntax on
+
+"Buffers integration
+"Buffers can be hidden but still alive
+"Limit buffer history for speed
+"Switch buffers by using ctrl+h/l
+set hidden
+set history=500
+nnoremap <C-H> :bprev<CR>
+nnoremap <C-L> :bnext<CR>
+
+"Identation
+"2 spaces indentations
+filetype plugin indent on
+syntax enable
+set nosmartindent
+set cindent
+set shiftwidth=2
+set list
+set expandtab
+set listchars=tab:..,trail:~
+
+"Show matching chars
+"Like () or {}
+set showmatch
+
+"More than 80 chars is bad
+"Show a ruller on toggle
+nnoremap cc :let &cc = &cc == '' ? '119' : ''<CR>
+
+"Signcolumns
+"Avoid any unwanted background
+set signcolumn=yes
+hi clear SignColumn
+
+"Status line
+"Always show statusline
+"Hide the mode indicator as it is built in Airline
+"Hide command while typing
+set laststatus=2
+set noshowmode
+set noshowcmd
+
+"Enable project specific stuff
+"This is provided using a local .nvimrc
+"Secure avoid loading dangerous stuff
+set exrc
+set secure
+
+hi Normal guibg=NONE ctermbg=NONE
+set clipboard=unnamed
+
+let g:python_host_prog = '/Users/edupard/.pyenv/versions/neovim2/bin/python'
+let g:python3_host_prog = '/Users/edupard/.pyenv/versions/neovim3/bin/python'

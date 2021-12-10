@@ -1,0 +1,17 @@
+{
+  "workbench.colorTheme": "Andromeda",
+  "editor.tabCompletion": "on",
+  "editor.cursorStyle": "line-thin",
+  "files.autoSave": "onWindowChange",
+  "java.errors.incompleteClasspath.severity": "ignore",
+  "explorer.confirmDelete": false,
+  "vim.useSystemClipboard": true,
+  "terminal.integrated.fontFamily": "TerminessTTF Nerd Font",
+  "editor.formatOnSave": true,
+  "eslint.enable": true,
+  "eslint.autoFixOnSave": true,
+  "python.formatting.provider": "black",
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "python.jediEnabled": false
+}
