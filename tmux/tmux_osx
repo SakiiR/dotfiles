@@ -3,9 +3,17 @@
 set -g @plugin 'fcsonline/tmux-thumbs'
 set -g @plugin 'tmux-plugins/tmux-yank'
 set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-logging'
+set -g @plugin 'Alkindi42/tmux-bitwarden'
 
 # Terminal
 set -g default-terminal "screen-256color"
+
+# Thumbs
+set -g @thumbs-key F
+set -g @thumbs-command 'echo -n {} | pbcopy'
+set -g @thumbs-regexp-3 '0x[a-f0-9]+' # match adresses
+
 
 # Vi style keys
 set -g mode-keys vi
@@ -87,7 +95,7 @@ bind C-a send-prefix -2
 set -q -g status-utf8 on                  # expect UTF-8 (tmux < 2.2)
 setw -q -g utf8 on
 
-set -g history-limit 500000                 # boost history
+set -g history-limit 10000                 # boost history
 
 # reload configuration
 bind R source-file ~/.tmux.conf \; display '~/.tmux.conf sourced'
