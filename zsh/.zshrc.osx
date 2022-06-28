@@ -28,7 +28,42 @@ export PATH="$PATH:/usr/local/sbin"
 export PATH="$PATH:/usr/sbin"
 export PATH="$PATH:/sbin"
 export PATH="$PATH:$HOME/.local/bin"
+
+# dotnet
 export PATH="$PATH:$HOME/.dotnet/tools"
+# Poetry
+export PATH="$HOME/.poetry/bin:$PATH"
+# Add Go binaries
+export PATH=$HOME/.cargo/bin/:$PATH
+# Add Go binaries
+export PATH=$HOME/go/bin:$PATH
+# Add home binaries
+export PATH=$HOME/bin:$PATH
+# OpenSSL binaries
+export PATH="/usr/local/opt/openssl/bin:$PATH"
+# Android SDK utilities Binary
+export PATH="$HOME/Library/Android/sdk/build-tools/29.0.2":$PATH
+# Yarn globals
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+
+## History configuration
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=10000000
+SAVEHIST=10000000
+
+setopt BANG_HIST                 # Treat the '!' character specially during expansion.
+setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
+setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
+setopt SHARE_HISTORY             # Share history between all sessions.
+setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
+setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
+setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
+setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
+setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
+setopt HIST_VERIFY               # Don't execute immediately upon history expansion.
+setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 
 
 # Disable python SSL URLLIB warnings
@@ -45,33 +80,15 @@ export EDITOR='nvim'
 
 # Pyenv init
 export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
 
 # Go Path configuration
 export GOPATH=$HOME/go
 
-# Add Go binaries
-export PATH=$HOME/.cargo/bin/:$PATH
-
-# Add Go binaries
-export PATH=$HOME/go/bin:$PATH
-
-# Add home binaries
-export PATH=$HOME/bin:$PATH
-
-# OpenSSL binaries
-export PATH="/usr/local/opt/openssl/bin:$PATH"
-
-# Android SDK utilities Binary
-export PATH="$HOME/Library/Android/sdk/build-tools/29.0.2":$PATH
-
-# Bitwarden 
-. $HOME/.bitwarden-session
 
 # Aliases
 alias ls="exa"
 alias l="ls -lA"
-alias e="nvim"
+alias e="$EDITOR"
 alias c="code"
 alias ls="exa"
 alias cat="bat --theme=TwoDark"
@@ -87,7 +104,7 @@ alias dc="docker compose"
 alias http='http --verify=no'
 alias https='http --default-scheme=https --verify=no'
 alias httpburp='http --proxy=http:http://127.0.0.1:8080 --proxy=https:http://127.0.0.1:8080'
-alias fuzz='ffuf -c -H "User-Agent: test" -of html -t 1 -mc all'
+alias fuzz='ffuf -c -H "User-Agent: test" -of html -t 1 '
 alias fuzz_method='fuzz -X FUZZ -w ~/workspace/wordlists/http_methods.txt -t 8 -o _http_methods.txt -u'
 alias weather="curl wttr.in"
 alias random="head -c 8 /dev/urandom | rax2 -S"
@@ -115,6 +132,10 @@ timezsh() {
 
 pyenv_init() {
   eval "$(pyenv init -)"
+}
+
+rnd() {
+  cat /dev/urandom|head -c 64|xxd -p -c0
 }
 
 burp() {
@@ -250,10 +271,16 @@ notes () {
 }
 
 note () {
+  name=""
+  if [[ ! -z "$1" ]] ; then
+    name="$1"
+
+  fi
+
   mkdir -p "${NOTES_DIR}"
 
   _date=$(date +"%Y-%m-%d_%H-%M"|tr -d '\n')
-  $EDITOR "${NOTES_DIR}/note-${_date}.md"
+  $EDITOR "${NOTES_DIR}/note-${_date}_${name}.md"
 }
 
 
@@ -310,62 +337,14 @@ urlencode () {
   node -e 'process.stdout.write(encodeURIComponent(process.argv[1]));' "$1"
 }
 
-#########################
-# MUTAGEN CONFIGURATION #
-#########################
-
-# Aliases
-# example: 
-# - msm PROJECT
-# - msf PROJECT
-# - msp PROJECT
-# - msr PROJECT
-# etc
-alias msm="mutagen sync monitor"
-alias msf="mutagen sync flush"
-alias msp="mutagen sync pause"
-alias msr="mutagen sync resume"
-alias mst="mutagen sync terminate"
-alias msl="mutagen sync list"
-
-cdm() {
-    if test "$#" -lt 1 ; then
-      echo "USAGE: $0 PROJECT"
-      return
-    fi
-    remote_path=$(mutagen sync list -l "${1}"|fgrep 'URL:'|cut -d':' -f2|tail -n1|sed 's/^ //g')
-    echo "$remote_path"
-}
-
-msc() {
-    if test "$#" -lt 3 ; then
-      echo "USAGE: $0 PROJECT_name LOCALPATH REMOTEPATH"
-      return
-    fi
-    projectname=$(echo -ne "mut_${1}" | tr -cd '[:alnum:]')
-    localpath="${2}"
-    remotepath="${3}"
-    echo "[~] Creating Synchronisation:"
-    echo -e "\tProject: ${projectname}"
-    echo -e "\tLocal: ${locapath}"
-    echo -e "\tRemote: ${remotepath}"
-    mutagen sync create --watch-mode="portable" \
-                        --scan-mode="accelerated" \
-                        --sync-mode="two-way-resolved" \
-                        --ignore ".sync.ffs_db" \
-                        --ignore "*.ova" \
-                        --ignore "_*" \
-                        --name="${projectname}" "${localpath}" "${remotepath}"
-}
-
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
 if [[ -n $VIRTUAL_ENV && -e "${VIRTUAL_ENV}/bin/activate" ]]; then
   source "${VIRTUAL_ENV}/bin/activate"
 fi
 
-export PATH="$HOME/.poetry/bin:$PATH"
-
-source "$HOME/.config/broot/launcher/bash/br"
 
 eval "$(starship init zsh)"
+eval "$(pyenv init -)"
+
+
+export PATH="$PYENV_ROOT/shims:$PATH"
