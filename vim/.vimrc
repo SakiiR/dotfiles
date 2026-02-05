@@ -12,7 +12,6 @@ Plug 'easymotion/vim-easymotion' " Better Vim Motions !!
 Plug 'scrooloose/nerdcommenter' " Toggle Commenting
 Plug 'ervandew/supertab' " Tab Usage
 Plug 'lambdalisue/vim-gista' " Gist Handling
-Plug 'python-mode/python-mode'
 Plug 'chriskempson/base16-vim'
 Plug 'vim-scripts/nginx.vim'
 Plug 'ryanoasis/vim-devicons'
@@ -69,14 +68,6 @@ let g:UltiSnipsExpandTrigger="<C-t>"
 let g:UltiSnipsJumpForwardTrigger="<c-b>" 
 let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 
-" Flake8
-let g:flake8_cmd="/usr/local/bin/flake8"
-autocmd FileType python map <buffer> <C-c> :call Flake8()<CR>
-" Override go-to.definition key shortcut to Ctrl-]
-let g:pymode_rope_goto_definition_bind = "gd"
-let g:pymode_virtualenv = 1
-let g:pymode_virtualenv_path = $VIRTUAL_ENV
-let g:pymode_folding = 0
 
 " Colors and sizing
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
