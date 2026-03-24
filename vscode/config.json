@@ -1,17 +1,243 @@
 {
-  "workbench.colorTheme": "Andromeda",
-  "editor.tabCompletion": "on",
-  "editor.cursorStyle": "line-thin",
-  "files.autoSave": "onWindowChange",
-  "java.errors.incompleteClasspath.severity": "ignore",
-  "explorer.confirmDelete": false,
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "editor.unicodeHighlight.ambiguousCharacters": false,
+  "editor.insertSpaces": true,
+  "editor.smoothScrolling": true,
+  "editor.fontLigatures": "'calt', 'liga', 'dlig', 'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'ss07', 'ss08'",
+  "editor.fontVariations": true,
+  "editor.fontFamily": "Fira Code",
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "keyword",
+        "settings": {
+          "fontStyle": "bold"
+        }
+      },
+      {
+        "scope": "storage",
+        "settings": {
+          "fontStyle": "italic"
+        }
+      },
+      {
+        "scope": "constant.language",
+        "settings": {
+          "fontStyle": "bold"
+        }
+      },
+      {
+        "scope": "support.class.builtin",
+        "settings": {
+          "fontStyle": "bold underline"
+        }
+      },
+      {
+        "scope": "entity.name.function",
+        "settings": {
+          "fontStyle": "bold"
+        }
+      },
+      {
+        "scope": "invalid.deprecated",
+        "settings": {
+          "fontStyle": "bold strikethrough"
+        }
+      }
+    ]
+  },
+  "vim.normalModeKeyBindings": [
+    {
+      "before": [
+        "g",
+        "h"
+      ],
+      "commands": [
+        "editor.action.showDefinitionPreviewHover"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "i"
+      ],
+      "commands": [
+        "editor.action.goToImplementation"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "q"
+      ],
+      "commands": [
+        "editor.action.quickFix"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "r"
+      ],
+      "commands": [
+        "editor.action.referenceSearch.trigger"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "t"
+      ],
+      "commands": [
+        "editor.action.goToTypeDefinition"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "p",
+        "t"
+      ],
+      "commands": [
+        "editor.action.peekTypeDefinition"
+      ]
+    }
+  ],
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "<C-j>"
+      ],
+      "after": [
+        "}"
+      ]
+    },
+    {
+      "before": [
+        "<C-k>"
+      ],
+      "after": [
+        "{"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "e"
+      ],
+      "commands": [
+        "workbench.view.explorer"
+      ]
+    }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "<C-j>"
+      ],
+      "after": [
+        "}"
+      ]
+    },
+    {
+      "before": [
+        "<C-k>"
+      ],
+      "after": [
+        "{"
+      ]
+    }
+  ],
+  "vim.handleKeys": {
+    "<C-w>": false,
+    "<C-a>": false,
+    "<C-f>": false,
+    "<C-p>": false,
+    "<C-n>": false
+  },
+  "vim.highlightedyank.enable": true,
+  "vim.highlightedyank.color": "#a9dc7660",
+  "vim.highlightedyank.duration": 250,
   "vim.useSystemClipboard": true,
-  "terminal.integrated.fontFamily": "TerminessTTF Nerd Font",
+  "vim.statusBarColorControl": false,
+  "editor.cursorSurroundingLines": 8,
+  "workbench.list.smoothScrolling": true,
+  "git.pullTags": false,
+  "editor.formatOnType": true,
+  "git.autofetch": true,
+  "gitlens.views.tags.branches.layout": "list",
+  "gitlens.views.branches.branches.layout": "list",
+  "git.confirmSync": false,
+  "python.analysis.completeFunctionParens": true,
+  "git.enableSmartCommit": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "security.workspace.trust.untrustedFiles": "open",
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.git": false
+  },
   "editor.formatOnSave": true,
-  "eslint.enable": true,
-  "eslint.autoFixOnSave": true,
-  "python.formatting.provider": "black",
-  "editor.suggestSelection": "first",
-  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
-  "python.jediEnabled": false
+  "diffEditor.ignoreTrimWhitespace": false,
+  "[sql]": {
+    "editor.formatOnSave": false
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.unusedImports": "explicit"
+    }
+  },
+  "terminal.integrated.fontFamily": "Monaspace Krypton",
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  },
+  "workbench.colorTheme": "Andromeda",
+  "extensions.experimental.affinity": {
+    "vscodevim.vim": 1
+  },
+  "vim.leader": "<space>",
+  "[dockercompose]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.autoIndent": "advanced",
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": true
+    },
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[github-actions-workflow]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "cSpell.userWords": [
+    "Sekost"
+  ],
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+  "docker.extension.enableComposeLanguageServer": false,
+  "claudeCode.preferredLocation": "panel",
+  "files.insertFinalNewline": true,
+  "workbench.iconTheme": "material-icon-theme"
 }

@@ -1,14 +1,58 @@
 #!/bin/bash
 
-PIX="https://pix.watch"
-API=$PIX/api
+. ~/.transfer
 
-scrot -z -d 1 -e 'mv $f /tmp/ && cp /tmp/$f /tmp/last.png'
-# Send the screenshot over pix.watch
-CONTENT=$(curl -X POST --silent -F pic=@/tmp/last.png $API)
-URL=$PIX$CONTENT
-rm /tmp/last.png
-xdg-open "$URL"
-echo -ne $URL | xclip -selection clipboard
-notify-send --urgency low "Screenshot done ! $URL Copied to clipboard"
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --transfer)
+      TRANSFER=YES
+      shift # past argument
+      ;;
+    --clip)
+      CLIP=YES
+      shift # past argument
+      ;;
+    --notify)
+      NOTIFY=YES
+      shift # past argument
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+output=~/Pictures/Screenshots/capture_$(date +"%Y-%m-%d_%H-%M").png
+stdout=`maim -s "$output"`
+
+notify() {
+  if [ "${NOTIFY}" = "YES" ]; then
+    notify-send "$1"
+  fi
+}
+
+notify "Screenshot done!"
+
+if [ "${TRANSFER}" = "YES" ]; then
+    stdout=`transfer "$output"`
+    notify "Uploaded!"
+fi
+
+if [ "${CLIP}" = "YES" ]; then
+  echo -n "${stdout}"
+  echo -n "${stdout}"|xclip -sel clip
+  notify "Copied to clipboard!"
+fi
+
+
+
 

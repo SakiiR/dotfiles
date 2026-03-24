@@ -1,5 +1,3 @@
-nitch
-
 export ZSH="$HOME/.oh-my-zsh"
 
 DISABLE_UPDATE_PROMPT="true"
@@ -18,6 +16,17 @@ ZSH_THEME="catppuccin"
 CATPPUCCIN_FLAVOR="machiato" # Required! Options: mocha, flappe, macchiato, latte
 CATPPUCCIN_SHOW_TIME=true
 
+# curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
+source ~/.zplug/init.zsh
+
+zplug "plugins/git",   from:oh-my-zsh
+zplug "plugins/docker",   from:oh-my-zsh
+zplug "plugins/docker-compose",   from:oh-my-zsh
+zplug "zsh-users/zsh-syntax-highlighting", defer:2
+
+zplug load --verbose
+
+
 # Note for me later, docker issues might be because of carapace ;)
 plugins=(vi-mode zsh-syntax-highlighting docker docker-compose fzf-tab)
 
@@ -28,23 +37,13 @@ export PATH="$PATH:/usr/local/sbin"
 export PATH="$PATH:/usr/sbin"
 export PATH="$PATH:/sbin"
 export PATH="$PATH:$HOME/.local/bin"
-# dotnet
 export PATH="$PATH:$HOME/.dotnet/tools"
-# Poetry
 export PATH="$HOME/.poetry/bin:$PATH"
-# Add Rust binaries
 export PATH=$HOME/.cargo/bin/:$PATH
-# Add Go binaries
 export PATH=$HOME/go/bin:$PATH
-# Add Go binaries
-export PATH=$PATH:/usr/local/go/bin
-# Yarn globals
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-# NodeJS
 export PATH="$HOME/.npm-global/bin:$PATH"
-# ASDF Shims
 export PATH="$HOME/.asdf/shims:$PATH"
-# Go Path configuration
 export GOPATH=$HOME/go
 
 ## History configuration
@@ -143,8 +142,6 @@ nmapFast() {
   echo "[±] Starting Fast Nmap Scan for $item"
   echo " +++ "
 
-  # nmap -vvv -sTV -Pn -n --top-ports=100 --reason --open --version-intensity=7 -T4 -oA "${item2}_fast" "$item"
-  # nmap -vvv -n -sV --reason -Pn --version-intensity=3 --top-ports=1000 -oA "${item2}_fast" "$item"
   nmap -vvv -sTV -Pn -n --top-ports=1000 --reason --open --version-intensity=7 -T4 -oA "${item2}_fast" "$item"
 }
 
@@ -339,29 +336,9 @@ update_discord() {
     echo "Removed DEB file"                                 && \
 }
 
-
-eval "$(starship init zsh)"
-
-. ~/.transfer
-
-
-#source <(carapace _carapace)
-
-autoload -Uz compinit
 zstyle ':completion:*' menu select
+
 fpath+=~/.zfunc
 
-
-
-# bun completions
-[ -s "/home/edupard/.bun/_bun" ] && source "/home/edupard/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-fpath+=~/.zfunc; autoload -Uz compinit; compinit
-
-eval "$(acli completion zsh)"
-
-
+export DEFAULT_KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+export DEFAULT_KAFKA_BROKERS=127.0.0.1:9092

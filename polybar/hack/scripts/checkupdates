@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+#
+#   checkupdates (APT version): Safely print a list of pending updates.
+#   Modeled after the pacman "checkupdates" script.
+#
+#   Does NOT modify the system. Creates a temporary lists directory,
+#   updates package lists there, and reads upgradeable packages.
+#
+
+set -e
+
+myname='checkupdates'
+myver='1.0.0-apt'
+
+# --- Usage ---------------------------------------------------------------
+if (( $# > 0 )); then
+    echo "${myname} v${myver}"
+    echo
+    echo "Safely print a list of pending APT package updates."
+    echo
+    echo "Usage: ${myname}"
+    echo
+    echo 'Note: Export the CHECKUPDATES_DB variable to override the temporary directory.'
+    exit 0
+fi
+
+# --- Dependencies ---------------------------------------------------------
+if ! command -v apt-get >/dev/null; then
+    echo "ERROR: apt-get not found." >&2
+    exit 1
+fi
+
+# Choose aptitude if available
+if command -v aptitude >/dev/null; then
+    USE_APTITUDE=1
+else
+    USE_APTITUDE=0
+fi
+
+# --- Temporary DB directory -----------------------------------------------
+if [[ -z "$CHECKUPDATES_DB" ]]; then
+    CHECKUPDATES_DB="${TMPDIR:-/tmp}/checkupdates-apt-${USER}"
+fi
+
+mkdir -p "$CHECKUPDATES_DB/lists/partial"
+
+# Clean previous tmp lists if present
+rm -f "$CHECKUPDATES_DB/lists/"*.gz 2>/dev/null || true
+
+# APT needs a minimal config override pointing to the temp lists directory
+APT_OPTIONS=(
+    "-o" "Dir::State::Lists=${CHECKUPDATES_DB}/lists/"
+    "-o" "Dir::State=${CHECKUPDATES_DB}/"
+    "-o" "Dir::Cache=${CHECKUPDATES_DB}/"
+    "-o" "Debug::NoLocking=yes"
+)
+
+# --- Update the temporary lists -------------------------------------------
+apt-get "${APT_OPTIONS[@]}" update -qq >/dev/null 2>&1 || {
+    echo "ERROR: Cannot fetch updates." >&2
+    exit 1
+}
+
+# --- Query upgradeable packages -------------------------------------------
+if (( USE_APTITUDE )); then
+    # aptitude search '~U' lists upgradable packages safely
+    aptitude -F '%p' --disable-columns search '~U'
+else
+    # apt list --upgradeable in temporary mode
+    apt list --upgradeable "${APT_OPTIONS[@]}" 2>/dev/null \
+        | tail -n +2 \
+        | cut -d/ -f1
+fi
+
+exit 0

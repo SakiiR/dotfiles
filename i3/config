@@ -104,17 +104,17 @@ bindsym $mod+d exec --no-startup-id rofi -no-config -no-lazy-grab -show drun -mo
 bindsym $mod+Tab exec --no-startup-id rofi -no-config -no-lazy-grab -show window -modi window -theme ~/.config/polybar/forest/scripts/rofi/launcher.rasi
 
 # lock
-bindsym $mod+o exec --no-startup-id ~/.local/bin/lock
+bindsym $mod+o exec --no-startup-id ~/.local/bin/lock.sh
 
 # file manager
 bindsym $mod+e exec --no-startup-id thunar
 
 # settings
-bindsym $mod+g exec --no-startup-id gnome-control-center
+bindsym $mod+g exec --no-startup-id env XDG_CURRENT_DESKTOP=GNOME gnome-control-center
 
 # screenshot
-bindsym $mod+p exec --no-startup-id screenshot
-bindsym $mod+Shift+p exec screenshot --transfer --clip --notify
+bindsym $mod+p exec --no-startup-id screenshot.sh
+bindsym $mod+Shift+p exec screenshot.sh --transfer --clip --notify
 
 # Kill focused window
 bindsym $mod+x kill
