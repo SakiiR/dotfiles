@@ -68,7 +68,7 @@ setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # Language
-export LANG=fr_FR.UTF-8
+export LANG=en_US.UTF-8
 
 # Editor
 export EDITOR='vim'
