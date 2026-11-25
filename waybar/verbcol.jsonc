@@ -1,0 +1,48 @@
+// -*- mode: jsonc -*-
+// Two bars: top (workspaces, clock, battery + audio) and bottom (system info, centered).
+// Module definitions live in modules.jsonc.
+[
+    {
+        "name": "top",
+        "include": ["~/.config/waybar/modules.jsonc"],
+        "layer": "top",
+        "position": "top",
+        "spacing": 3,
+        "margin-top": 0,
+        "margin-bottom": 0,
+
+        "modules-left": [
+            "niri/workspaces",
+            "niri/window"
+        ],
+        "modules-center": [
+            "clock",
+            "custom/weather"
+        ],
+        "modules-right": [
+            "custom/claude",
+            "battery",
+            "group/audio"
+        ]
+    },
+    {
+        "name": "bottom",
+        "include": ["~/.config/waybar/modules.jsonc"],
+        "layer": "top",
+        "position": "bottom",
+        "spacing": 40,
+        "margin-top": 0,
+        "margin-bottom": 0,
+
+        "modules-left": [
+            "group/spotify"
+        ],
+        "modules-center": [
+            "group/cpu",
+            "memory",
+            "group/hw",
+            "custom/docker",
+            "custom/updates"
+        ]
+    }
+]

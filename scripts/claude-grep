@@ -1,0 +1,324 @@
+#!/usr/bin/env bash
+# claude-grep — search Claude Code session transcripts and resume the one you pick.
+#
+# Sessions are JSONL files under ~/.claude/projects/<slugified-cwd>/<uuid>.jsonl.
+# This wraps grep over them, renders the hits in an fzf picker with a preview,
+# and resumes the selected session in its own working directory.
+#
+# Option convention: UPPERCASE short options belong to claude-grep, every other
+# option is forwarded verbatim to grep (-w, -F, -e, -m, --include, …).
+
+set -uo pipefail
+
+PROJECTS_DIR="${CLAUDE_PROJECTS_DIR:-$HOME/.claude/projects}"
+FZF="${FZF:-$(command -v fzf || echo "$HOME/.fzf/bin/fzf")}"
+CLAUDE_BIN="${CLAUDE_BIN:-$HOME/.local/bin/claude}"
+SELF=$(readlink -f "${BASH_SOURCE[0]}")
+JOBS=$(nproc 2>/dev/null || echo 4)
+ALL_ROLES="you,cld,run,out,sys"
+PREVIEW_MAX_BLOCKS=${CLAUDE_GREP_PREVIEW_BLOCKS:-60}
+PREVIEW_MAX_LINES=${CLAUDE_GREP_PREVIEW_LINES:-14}
+
+# ---------------------------------------------------------------- jq renderer
+# Flattens one transcript to "role<TAB>HH:MM<TAB>text" lines, one per content block.
+# Roles: you = what you typed, cld = assistant text, run = tool call,
+#        out = tool result, sys = skill bodies, slash commands, task notifications.
+# Newlines become " ⏎ " so one block is one grep-able line; the preview restores them.
+# clean uses split/join, not gsub: jq's regex engine is ~14× slower on the
+# multi-megabyte tool results these files are full of.
+read -r -d '' JQ_RENDER <<'JQ'
+def clean: split("\r") | join("") | split("\n") | join(" ⏎ ") | split("\t") | join("  ");
+def str: if type == "string" then . else tojson end;
+def tool:
+  (.name // "?") as $n | (.input // {}) as $i
+  | if $n == "Bash" then
+      "Bash  $ " + ($i.command // "")
+      + (if $i.description then "\n# " + $i.description else "" end)
+    elif ($i | type) == "object" then
+      $n + "  " + ($i | to_entries | map("\(.key): \(.value | str)") | join("\n"))
+    else $n + "  " + ($i | str) end;
+def sysmsg:
+  .[0:200] | test("^\\s*(<(task-notification|command-|local-command|system-reminder|user-prompt-submit-hook|bash-)|Base directory for this skill|Caveat: )");
+
+select(.type == "user" or .type == "assistant")
+| .timestamp[11:16] as $ts
+| (.type == "user") as $isuser
+| (.message.content // empty) as $c
+| (
+    if ($c | type) == "string" then [{ who: (if ($c | sysmsg) then "sys" else "you" end), t: $c }]
+    elif ($c | type) == "array" then
+      $c | map(
+        if .type == "text" then
+          { who: (if $isuser then (if ((.text // "") | sysmsg) then "sys" else "you" end) else "cld" end),
+            t: (.text // "") }
+        elif .type == "tool_use" then { who: "run", t: tool }
+        elif .type == "tool_result" then
+          { who: "out",
+            t: (if (.content | type) == "string" then .content
+                elif (.content | type) == "array" then
+                  (.content | map(select(.type == "text") | .text) | join("\n"))
+                else (.content | tostring) end) }
+        else empty end
+      )
+    else [] end
+  )[]
+| select((.t // "") | length > 0)
+| "\(.who)\t\($ts)\t\(.t | clean)"
+JQ
+
+render() { jq -r "$JQ_RENDER" "$1" 2>/dev/null; }
+
+# matched <rendered-file> <roles> [grep args...] — "lineno<TAB>role" of each hit.
+# grep runs on the text column only, so a pattern never hits the role or time.
+matched() {
+  local rf="$1" roles="$2"; shift 2
+  awk -F'\t' -v roles=",$roles," '
+    NR == FNR { hit[$1] = 1; next }
+    (FNR in hit) && index(roles, "," $1 ",") { print FNR "\t" $1 }
+  ' <(cut -f3- "$rf" | grep -n "$@" | cut -d: -f1) "$rf"
+}
+
+# session_meta <file> — "<cwd>  <branch>" from the first row that carries them
+session_meta() {
+  jq -nr 'first(inputs | select(.cwd)) | "\(.cwd)  \(.gitBranch // "")"' "$1" 2>/dev/null
+}
+session_title() {
+  grep -a '"type":"ai-title"' "$1" | tail -1 | jq -r '.aiTitle // empty' 2>/dev/null
+}
+
+# Role styles: glyph, colour, label — close to the Claude Code TUI.
+role_style() {
+  case "$1" in
+    you) printf '\033[1;32m❯ you\033[0m' ;;
+    cld) printf '\033[1;38;5;208m● claude\033[0m' ;;
+    run) printf '\033[1;33m● tool\033[0m' ;;
+    out) printf '\033[2m  ⎿ output\033[0m' ;;
+    sys) printf '\033[2;35m◆ system\033[0m' ;;
+  esac
+}
+role_bar() {
+  case "$1" in
+    you) printf '\033[32m│\033[0m ' ;;
+    cld) printf '\033[38;5;208m│\033[0m ' ;;
+    run) printf '\033[33m│\033[0m ' ;;
+    *)   printf '\033[2m│\033[0m ' ;;
+  esac
+}
+
+# ------------------------------------------------------- internal sub-commands
+# Both take: <file> <roles> <pattern> [assembled grep args...]
+# An empty <pattern> means the pattern came from a grep -e/-f option instead.
+if [[ "${1:-}" == "--preview" || "${1:-}" == "--row" ]]; then
+  mode="$1"; file="$2"; roles="$3"; pat="$4"; shift 4
+  pat_args=(); [[ -n "$pat" ]] && pat_args=(-- "$pat")
+  rf=$(mktemp); trap 'rm -f "$rf"' EXIT
+  render "$file" > "$rf"
+  hits=$(matched "$rf" "$roles" "$@" ${pat_args+"${pat_args[@]}"})
+
+  if [[ "$mode" == "--row" ]]; then
+    [[ -z "$hits" ]] && exit 0
+    # Counts per role, and the first hit of the most conversational role.
+    read -r cy cc cr co cs best < <(printf '%s\n' "$hits" | awk -F'\t' '
+      BEGIN { p["you"] = 1; p["cld"] = 2; p["run"] = 3; p["sys"] = 4; p["out"] = 5; bp = 99 }
+      { n[$2]++; if (p[$2] < bp) { bp = p[$2]; best = $1 } }
+      END { printf "%d %d %d %d %d %d\n", n["you"], n["cld"], n["run"], n["out"], n["sys"], best }')
+    snippet=$(sed -n "${best}p" "$rf" | cut -b 1-400 | iconv -c -f UTF-8 -t UTF-8 \
+      | awk -F'\t' '{ printf "%s  %s  %s", $2, $1, $3 }' | jq -Rr '.[0:150]')
+    z() { (( $1 )) && printf '%3d' "$1" || printf '  ·'; }
+    proj=$(basename "$(dirname "$file")")
+    [[ "$proj" == "subagents" ]] && proj=$(basename "$(dirname "$(dirname "$file")")")
+    printf '%s\t%s\t%s %s %s %s %s\t%s\t%s\t%s\n' \
+      "$(date -r "$file" '+%Y-%m-%d %H:%M')" \
+      "$(basename "${file%.jsonl}" | cut -c1-8)" \
+      "$(z "$cy")" "$(z "$cc")" "$(z "$cr")" "$(z "$co")" "$(z "$cs")" \
+      "${proj#-home-"$USER"-}" "$snippet" "$file"
+    exit 0
+  fi
+
+  # --preview
+  title=$(session_title "$file")
+  printf '\033[1;36m%s\033[0m\n' "${title:-(untitled)}"
+  printf '\033[2m%s · %s\n%s\033[0m\n' "$(basename "${file%.jsonl}")" \
+    "$(date -r "$file" '+%Y-%m-%d %H:%M')" "$(session_meta "$file")"
+  total=0; [[ -n "$hits" ]] && total=$(printf '%s\n' "$hits" | wc -l)
+  if [[ -n "$hits" ]]; then
+    printf '%s\n' "$hits" | awk -F'\t' '{ n[$2]++ } END {
+      split("you cld run out sys", r, " ")
+      for (i = 1; i <= 5; i++) if (n[r[i]]) printf "%s %d   ", r[i], n[r[i]]
+      print "" }' | sed 's/^/\x1b[2mhits: /; s/$/\x1b[0m/'
+  fi
+  printf '\033[2m%s\033[0m\n' "$(printf '─%.0s' {1..60})"
+
+  sep=$'\033[2m⋯\033[0m'
+  shown=0
+  while IFS=$'\t' read -r ln who; do
+    (( shown++ >= PREVIEW_MAX_BLOCKS )) && break
+    IFS=$'\t' read -r _ ts text < <(sed -n "${ln}p" "$rf")
+    printf '\n%s  \033[2m%s\033[0m\n' "$(role_style "$who")" "$ts"
+    # Restore line breaks, fold long lines so -C context stays readable.
+    body=$(printf '%s\n' "$text" | sed 's/ ⏎ /\n/g' | fold -s -w 220 | iconv -c -f UTF-8 -t UTF-8)
+    nl=$(printf '%s\n' "$body" | wc -l)
+    if (( nl <= PREVIEW_MAX_LINES )); then
+      out=$(printf '%s\n' "$body" | grep --color=always -C 100000 "$@" ${pat_args+"${pat_args[@]}"})
+    else
+      out=$(printf '%s\n' "$body" \
+        | grep --color=always -C 2 --group-separator="$sep" "$@" ${pat_args+"${pat_args[@]}"} \
+        | head -n "$PREVIEW_MAX_LINES")
+      [[ -n "$out" ]] && out+=$'\n'"$sep"
+    fi
+    # The match can span a line break: then grep finds nothing, show the start.
+    [[ -z "$out" ]] && out=$(printf '%s\n' "$body" | head -n "$PREVIEW_MAX_LINES")
+    bar=$(role_bar "$who")
+    printf '%s\n' "$out" | sed "s/^/$bar/"
+  done <<< "$hits"
+  (( total > PREVIEW_MAX_BLOCKS )) && \
+    printf '\n\033[2m… %d more hit(s)\033[0m\n' "$(( total - PREVIEW_MAX_BLOCKS ))"
+  exit 0
+fi
+
+# ---------------------------------------------------------------- arg parsing
+usage() {
+  cat <<'EOF'
+claude-grep — search Claude Code sessions, then resume one.
+
+  claude-grep [options] [grep options] PATTERN
+
+claude-grep options (uppercase):
+  -H, --here            search only the current directory's project (default: every project)
+  -P, --project PATH    search only the sessions of that project directory
+  -A, --all             search every project (the default, kept for old habits)
+  -R, --roles LIST      match only these roles, comma-separated (default: all)
+                          you  your prompts          cld  Claude's replies
+                          run  tool calls            out  tool output
+                          sys  skill bodies, slash commands, task notifications
+  -U, --user            same as -R you
+  -C, --chat            same as -R you,cld (the conversation only)
+  -S, --subagents       include subagent transcripts
+  -L, --list            print matching sessions and exit (no picker)
+  -h, --help            this text
+
+Any other option is passed straight to grep:
+  claude-grep -w migration              whole word
+  claude-grep -F 'back.asset[0]'        literal string
+  claude-grep -e foo -e bar             several patterns
+  claude-grep --no-ignore-case Asset    case-sensitive
+
+Defaults are -a -E -i; -E is dropped if you pick another matcher (-F/-G/-P)
+and -i is dropped if you pass a case flag yourself.
+
+The hit columns count matches per role: you / cld / run / out / sys.
+Enter resumes the picked session in its own directory; Ctrl-O prints its path.
+EOF
+}
+
+scope_here=0; scope_dir=""; roles="$ALL_ROLES"; subagents=0; list_only=0
+user_grep_args=(); pattern=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -A|--all)        scope_here=0; scope_dir=""; shift ;;
+    -H|--here)       scope_here=1; shift ;;
+    -P|--project)    scope_dir="${2:?--project needs a path}"; shift 2 ;;
+    -R|--roles)      roles="${2:?--roles needs a list}"; shift 2 ;;
+    -U|--user)       roles="you"; shift ;;
+    -C|--chat)       roles="you,cld"; shift ;;
+    -S|--subagents)  subagents=1; shift ;;
+    -L|--list)       list_only=1; shift ;;
+    -h|--help)       usage; exit 0 ;;
+    # grep options that take a separate value
+    -e|-m|-f|--regexp|--max-count|--file)
+                     user_grep_args+=("$1" "${2:?$1 needs a value}"); shift 2 ;;
+    --)              shift; pattern="${1:-}"; shift; break ;;
+    -*)              user_grep_args+=("$1"); shift ;;
+    *)               pattern="$1"; shift; break ;;
+  esac
+done
+(( $# )) && { echo "claude-grep: unexpected extra argument: $1" >&2; exit 2; }
+roles=$(tr -d ' ' <<< "$roles")
+for r in ${roles//,/ }; do
+  [[ ",$ALL_ROLES," == *",$r,"* ]] || { echo "claude-grep: unknown role '$r' (use $ALL_ROLES)" >&2; exit 2; }
+done
+
+has_flag() { # has_flag <regex> — true if any user grep arg matches
+  local a; for a in ${user_grep_args+"${user_grep_args[@]}"}; do [[ "$a" =~ $1 ]] && return 0; done; return 1
+}
+# Explicit -e/-f patterns make the positional one optional.
+if [[ -z "$pattern" ]] && ! has_flag '^(-e|-f|--regexp|--file)$'; then usage >&2; exit 2; fi
+[[ -d "$PROJECTS_DIR" ]] || { echo "claude-grep: no $PROJECTS_DIR" >&2; exit 1; }
+
+grep_args=(-a)
+has_flag '^(-[a-zA-Z]*[EFGP]|--(extended|fixed|basic|perl)-regexp|--fixed-strings)' || grep_args+=(-E)
+has_flag '^(-[a-zA-Z]*[iy]|--(no-)?ignore-case)'                                    || grep_args+=(-i)
+grep_args+=(${user_grep_args+"${user_grep_args[@]}"})
+pat_args=(); [[ -n "$pattern" ]] && pat_args=(-- "$pattern")
+
+# Claude slugifies the cwd: every character outside [A-Za-z0-9] becomes '-'.
+slugify() { printf '%s' "$1" | sed 's/[^A-Za-z0-9]/-/g'; }
+
+if [[ -n "$scope_dir" ]]; then
+  roots=("$PROJECTS_DIR/$(slugify "$(cd "$scope_dir" && pwd)")")
+  [[ -d "${roots[0]}" ]] || { echo "claude-grep: no sessions for $scope_dir" >&2; exit 1; }
+elif (( scope_here )); then
+  roots=("$PROJECTS_DIR/$(slugify "$PWD")")
+  [[ -d "${roots[0]}" ]] || { echo "claude-grep: no sessions for $PWD" >&2; exit 1; }
+else
+  roots=("$PROJECTS_DIR")
+fi
+
+# --------------------------------------------------------------- gather files
+# Cheap grep prefilter over the raw JSON first, so the costly render runs only
+# on files that can match at all.
+mapfile -t candidates < <(
+  find "${roots[@]}" -name '*.jsonl' -type f -print0 2>/dev/null \
+    | { (( subagents )) && cat || grep -zv '/subagents/'; } \
+    | xargs -0 -r grep -l "${grep_args[@]}" ${pat_args+"${pat_args[@]}"} 2>/dev/null
+)
+(( ${#candidates[@]} )) || { echo "claude-grep: no session matches" >&2; exit 1; }
+
+# ------------------------------------------------- score and format each hit
+rows=$(
+  printf '%s\0' "${candidates[@]}" \
+    | xargs -0 -r -P "$JOBS" -I{} "$SELF" --row {} "$roles" "$pattern" "${grep_args[@]}" \
+    | sort -r
+)
+[[ -z "$rows" ]] && { echo "claude-grep: no session matches" >&2; exit 1; }
+
+if (( list_only )); then
+  if [[ -t 1 ]]; then width=$(tput cols 2>/dev/null || echo 200); else width=${COLUMNS:-200}; fi
+  printf '%-16s  %-8s  %s  %-34s  %s\n' date id "you cld run out sys" project "first hit"
+  printf '%s\n' "$rows" \
+    | awk -F'\t' '{ printf "%-16s  %-8s  %s  %-34s  %s\n", $1, $2, $3, substr($4, 1, 34), $5 }' \
+    | cut -c "1-$width"
+  exit 0
+fi
+
+# --------------------------------------------------------------------- picker
+command -v "$FZF" >/dev/null || { printf '%s\n' "$rows" | cut -f1-5; exit 0; }
+
+prev_args=$(printf '%q ' "$roles" "$pattern" "${grep_args[@]}")
+picked=$(printf '%s\n' "$rows" | "$FZF" \
+  --ansi --delimiter=$'\t' --with-nth=1,2,3,4,5 \
+  --header="grep ${grep_args[*]} ${pattern} · roles ${roles} · ${#candidates[@]} session(s) · enter=resume ctrl-o=path
+hits: you cld run out sys" \
+  --preview="'$SELF' --preview {6} $prev_args" \
+  --preview-window='right,60%,wrap' \
+  --expect=ctrl-o --no-multi)
+[[ -z "$picked" ]] && exit 0
+
+key=$(printf '%s\n' "$picked" | head -1)
+file=$(printf '%s\n' "$picked" | tail -1 | cut -f6)
+uuid=$(basename "${file%.jsonl}")
+
+if [[ "$key" == "ctrl-o" ]]; then
+  printf '%s\n' "$file"
+  exit 0
+fi
+
+if [[ "$file" == */subagents/* ]]; then
+  echo "claude-grep: $uuid is a subagent transcript — not resumable. Path:" >&2
+  printf '%s\n' "$file"
+  exit 0
+fi
+
+cwd=$(jq -nr 'first(inputs | select(.cwd)) | .cwd // empty' "$file" 2>/dev/null)
+[[ -d "${cwd:-}" ]] && cd "$cwd"
+exec "$CLAUDE_BIN" --resume "$uuid"

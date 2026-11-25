@@ -1,0 +1,170 @@
+# Forest palette — the rice colors, dumped from the live configs
+# Origin: matugen image ~/Pictures/forest.png --prefer saturation (dark mode)
+# Setup:  niri + waybar (mono.css) + kitty + fuzzel + dunst, font Hack Nerd Font
+# Last updated: 2026-11-25
+#
+# Values below are what the configs use today, not what they should use.
+# Tools that do not follow the forest palette yet are listed under "OFF-PALETTE".
+
+# ══════════════════════════════════════════════════════════════
+# CURRENT PALETTE
+# ══════════════════════════════════════════════════════════════
+
+# ── Backgrounds ────────────────────────────────────────────────
+bg          = #0e1514   # deepest background (kitty, fuzzel, dunst normal)
+bg_surface  = #1a2120   # surface container (waybar bar, dunst low/critical)
+bg_elevated = #252b2b   # elevated surface (selections)
+bg_high     = #2f3635   # highest elevated
+
+# ── Text ───────────────────────────────────────────────────────
+fg          = #dde4e3   # main text
+fg_dim      = #bec9c7   # muted / secondary text
+
+# ── Borders / Outlines ─────────────────────────────────────────
+outline     = #3f4948   # borders, dividers, muted/disabled modules
+outline_dim = #293232   # very subtle borders
+
+# ── Primary accent — teal ──────────────────────────────────────
+primary        = #80d5d1   # main teal accent
+primary_bright = #9cf1ee   # bright teal highlight
+primary_dim    = #4ddad6   # vibrant cyan
+on_primary     = #003736   # text on top of primary bg
+
+# ── Secondary accent — steel blue ──────────────────────────────
+blue        = #b1c8e8   # steel blue (CPU, disk, volume, mic, docker, bluetooth)
+blue_dim    = #96adcc   # muted blue
+blue_bright = #d1e4ff   # bright blue (kitty color12)
+
+# ── Error / Urgent — coral ─────────────────────────────────────
+coral        = #ffb4ab  # soft coral (critical, urgent, muted mic, pending updates)
+coral_bright = #ff5449  # bright coral / red
+
+# ── Utility ────────────────────────────────────────────────────
+muted_teal  = #b0ccca   # muted teal-gray (temperature)
+secondary   = #cce8e6   # very light teal (kitty color11)
+
+# ── Brand accents (outside matugen, used on purpose) ───────────
+claude        = #d97757 # Claude orange (waybar custom/claude)
+claude_warn   = #ffb86c # Claude usage warning
+spotify_green = #1db954 # Spotify green (waybar mpris)
+
+# ══════════════════════════════════════════════════════════════
+# PER-TOOL MAPPING
+# ══════════════════════════════════════════════════════════════
+
+# waybar (~/.config/waybar/mono.css)
+#   window bg:          transparent
+#   bar bg / border:    bg_surface / outline      #1a2120 / #3f4948
+#   text:               fg                        #dde4e3
+#   inactive workspace: fg_dim                    #bec9c7
+#   active workspace:   on_primary on gradient primary → primary_dim
+#   urgent workspace:   coral (+ 2px underline)   #ffb4ab
+#   clock / weather:    primary_bright            #9cf1ee
+#   cpu / disk:         blue                      #b1c8e8
+#   memory:             primary                   #80d5d1
+#   temperature:        muted_teal                #b0ccca
+#   temperature crit:   coral                     #ffb4ab
+#   backlight:          fg_dim                    #bec9c7
+#   battery:            primary                   #80d5d1
+#   battery charging:   primary_bright            #9cf1ee
+#   battery warning:    blue                      #b1c8e8
+#   battery critical:   coral (blinks)            #ffb4ab
+#   network:            primary                   #80d5d1
+#   disconnected:       coral                     #ffb4ab
+#   volume / mic:       blue                      #b1c8e8
+#   volume muted:       outline                   #3f4948
+#   mic muted:          coral                     #ffb4ab
+#   bluetooth:          blue / connected primary / off outline
+#   spotify / cava:     primary_dim               #4ddad6
+#   mpris:              spotify_green / paused outline
+#   docker:             blue                      #b1c8e8
+#   updates:            outline / pending coral
+#   claude:             claude / warning claude_warn / critical coral / stale outline
+#   separator:          outline                   #3f4948
+
+# kitty (~/.config/kitty/theme.conf)
+#   background:         bg              #0e1514
+#   foreground:         fg              #dde4e3
+#   cursor / text:      primary / on_primary      #80d5d1 / #003736
+#   selection:          bg_elevated / fg          #252b2b / #dde4e3
+#   color0/8 (black):   bg / outline              #0e1514 / #3f4948
+#   color1/9 (red):     coral / coral_bright      #ffb4ab / #ff5449
+#   color2/10 (green):  primary / primary_bright  #80d5d1 / #9cf1ee
+#   color3/11 (yellow): muted_teal / secondary    #b0ccca / #cce8e6
+#   color4/12 (blue):   blue / blue_bright        #b1c8e8 / #d1e4ff
+#   color5/13 (magenta):blue_dim / blue           #96adcc / #b1c8e8
+#   color6/14 (cyan):   primary_dim / primary_bright #4ddad6 / #9cf1ee
+#   color7/15 (white):  fg_dim / fg               #bec9c7 / #dde4e3
+
+# fuzzel (~/.config/fuzzel/fuzzel.ini)
+#   background:         bg              #0e1514
+#   text:               fg              #dde4e3
+#   match:              primary_bright  #9cf1ee
+#   selection bg:       bg_elevated     #252b2b
+#   selection text:     primary         #80d5d1
+#   selection match:    primary_dim     #4ddad6
+#   border:             outline         #3f4948
+
+# dunst (~/.config/dunst/dunstrc)
+#   global frame:       outline         #3f4948
+#   low:      bg bg_surface / fg fg_dim / frame outline / highlight primary
+#   normal:   bg bg       / fg fg     / frame primary / highlight primary_bright
+#   critical: bg bg_surface / fg fg   / frame coral   / highlight coral_bright
+
+# rofi (~/.config/rofi/forest.rasi — fuzzel is the launcher under niri)
+#   background:         bg_surface      #1a2120
+#   elevated:           bg_elevated     #252b2b
+#   selected text:      primary         #80d5d1
+#   match highlight:    primary         #80d5d1
+#   urgent:             coral           #ffb4ab
+
+# ══════════════════════════════════════════════════════════════
+# OFF-PALETTE (live values that do not follow forest)
+# ══════════════════════════════════════════════════════════════
+
+# niri (~/.config/niri/config.kdl)
+#   focus-ring active:   #00E8C6   (forest would be primary #80d5d1)
+#   focus-ring inactive: #3B3F4D   (forest would be outline #3f4948)
+#   border (off):        active #EE5D43 / inactive #2B2F3A / urgent #EE5D43
+#   shadow (windows + notifications layer): #23262Eaa (forest would be #0e1514aa)
+
+# notification body markup (~/.local/lib/notify-style.sh) — Tokyo Night colors
+#   N_DIM    #8a9a98   secondary text
+#   N_RED    #f7768e   urgent
+#   N_AMBER  #e0af68   needs watching
+#   N_GREEN  #9ece6a   comfortable
+#   N_CYAN   #7dcfff
+#   N_PURPLE #bb9af7
+#   N_BLUE   #7aa2f7
+
+# Catppuccin Mocha (not forest)
+#   tmux:  catppuccin plugin, slanted window status, current number @thm_yellow
+#   zsh:   catppuccin.zsh-theme (mocha)
+#   eza:   ~/.config/eza-theme.yml
+#     text #CDD6F4 / #BAC2DE / #A6ADC8   dim #7F849C / #585B70
+#     blue #89B4FA  sky #89DCEB  sapphire #74C7EC  mauve #CBA6F7
+#     green #A6E3A1  yellow #F9E2AF  red #F38BA8  maroon #EBA0AC
+#     teal #94E2D5  pink #F5C2E7
+
+# ══════════════════════════════════════════════════════════════
+# ORIGINAL COLORS (pre-forest, for reverting)
+# ══════════════════════════════════════════════════════════════
+
+# kitty theme.conf (original)
+#   background #202020 / foreground #d0d0d0 / cursor #d0d0d0
+#   color1 #ac4142 / color2 #7e8d50 / color3 #e5b566
+#   color4 #6c99ba / color5 #9e4e85 / color6 #7dd5cf
+
+# fuzzel (original)
+#   font=Iosevka Nerd Font:size=8
+#   background=212B30ff / text=C4C7C5ff / match=EC407Aff
+#   selection=263035ff / selection-text=4DD0E1ff / border=3F5360ff
+
+# dunst (original)
+#   urgency_low:      bg #202020 / fg #d0d0d0 / frame #505050
+#   urgency_normal:   bg #202020 / fg #d0d0d0 / frame #6c99ba
+#   urgency_critical: bg #1a0a0a / fg #f5f5f5 / frame #ac4142
+
+# waybar (original pre-forest)
+#   clock #ffc777 / cpu #ff966c / memory #c099ff
+#   battery #00E8C6 / active-ws gradient #00E8C6→#00c4aa

@@ -1,0 +1,11 @@
+[Unit]
+Description=btop persistent tmux session
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/tmux new-session -d -s btop /usr/bin/btop
+ExecStop=/usr/bin/tmux kill-session -t btop
+
+[Install]
+WantedBy=default.target

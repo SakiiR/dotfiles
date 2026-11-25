@@ -1,0 +1,199 @@
+// -*- mode: jsonc -*-
+// Shared module definitions, included by both bars in verbcol.jsonc
+{
+    "niri/window": {
+        "format": "󰀻 {title:.80}",
+        "max-length": 80,
+        "tooltip": true,
+        "separate-outputs": true
+    },
+
+    "clock": {
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format": "󰥔 {:%A, %d %B %H:%M}",
+        "format-alt": "󰥔 {:%H:%M}"
+    },
+    "bluetooth": {
+        "format": "󰂯 on",
+        "format-off": "󰂲 off",
+        "format-disabled": "󰂲 off",
+        "format-connected": "󰂱 {device_alias}",
+        "format-connected-battery": "󰂱 {device_alias} {device_battery_percentage}%",
+        "max-length": 24,
+        "tooltip-format": "{controller_alias}  {controller_address}\n{num_connections} connected",
+        "tooltip-format-connected": "{controller_alias}  {controller_address}\n{num_connections} connected\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}  {device_address}",
+        "tooltip-format-enumerate-connected-battery": "{device_alias}  {device_battery_percentage}%",
+        "on-click": "blueman-manager",
+        "on-click-right": "bluetoothctl show | grep -q 'Powered: yes' && bluetoothctl power off || bluetoothctl power on"
+    },
+    "cpu": {
+     	"interval": 1,
+     	"format": "󰻠 CPU {usage:2}% {icon0}{icon1}{icon2}{icon3}{icon4}{icon5}{icon6}{icon7}",
+        "tooltip-format": "{load} {avg_frequency:0.1f}GHz",
+        "on-click": "kitty -e btop",
+     	"format-icons": [
+          "<span color='#69ff94'>▁</span>", // green
+          "<span color='#2aa9ff'>▂</span>", // blue
+          "<span color='#f8f8f2'>▃</span>", // white
+          "<span color='#f8f8f2'>▄</span>", // white
+          "<span color='#ffffa5'>▅</span>", // yellow
+          "<span color='#ffffa5'>▆</span>", // yellow
+          "<span color='#ff9977'>▇</span>", // orange
+          "<span color='#dd532e'>█</span>"  // red
+     ]
+    },
+
+    "memory": {
+        "format": "󰍛 {used:0.1f}GiB ({percentage:2}%)",
+        "tooltip-format": "Total {total:0.1f}Gib",
+        "on-click": "kitty -e btop"
+    },
+
+    "temperature": {
+        "hwmon-path": "/sys/devices/platform/thinkpad_hwmon/hwmon/hwmon8/temp1_input",
+        "critical-threshold": 80,
+        "format": "󰔏 {temperatureC:2}°C",
+        "format-critical": "󰸁 {temperatureC:2}°C",
+        "on-click": "kitty -e btop"
+    },
+
+    "backlight": {
+        "format": "{icon} {percent:2}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "on-scroll-up": "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-",
+        "tooltip": false
+    },
+
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity:2}%",
+        "format-full": "󰁹 {capacity:2}%",
+        "format-charging": "󰂄 {capacity:2}%",
+        "format-plugged": "󰚥 {capacity:2}%",
+        "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "on-click": "kitty -e btop"
+    },
+
+    "network": {
+        "max-length": 20,
+        "format-wifi": "󰖩 {essid}",
+        "format-ethernet": "󰈀 {ipaddr}",
+        "tooltip-format": "{ifname} via {gwaddr}",
+        "format-linked": "󰈀 {ifname} (No IP)",
+        "format-disconnected": "󰖪 offline",
+        "on-click": "~/.local/bin/wifi.sh"
+    },
+
+    "pulseaudio": {
+        "format": "󰕾 {volume:2}%",
+        "format-muted": "󰝟",
+        "on-click": "pavucontrol"
+    },
+
+    "pulseaudio#microphone": {
+        "format": "{format_source}",
+        "format-source": "󰍬 {volume:2}%",
+        "format-source-muted": "󰍭",
+        "on-click": "pavucontrol",
+        "on-click-right": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+        "on-scroll-up": "pactl set-source-volume @DEFAULT_SOURCE@ +5%",
+        "on-scroll-down": "pactl set-source-volume @DEFAULT_SOURCE@ -5%",
+        "tooltip-format": "{source_desc} | {source_volume}%"
+    },
+
+    "custom/docker": {
+        "exec": "~/.config/waybar/scripts/docker.sh",
+        "return-type": "json",
+        "interval": 15,
+        "on-click": "kitty -e docker stats"
+    },
+
+    "custom/claude": {
+        "exec": "~/.config/waybar/scripts/claude.sh",
+        "return-type": "json",
+        "interval": 30,
+        "tooltip": true,
+        "on-click": "xdg-open https://claude.ai/settings/usage"
+    },
+
+    "custom/updates": {
+        "exec": "~/.local/bin/check-update --waybar",
+        "return-type": "json",
+        "interval": 1800,
+        "signal": 8,
+        "tooltip": true,
+        "on-click": "kitty -e sh -c '~/.local/bin/updates.sh; pkill -RTMIN+8 waybar'"
+    },
+
+    "custom/weather": {
+        "format": "{}°C",
+        "tooltip": true,
+        "interval": 5400,
+        "exec": "wttrbar --nerd --hide-conditions --date-format '%m/%d'",
+        "return-type": "json"
+    },
+
+    "image#spotify-cover": {
+        "exec": "~/.config/waybar/scripts/spotify-cover.sh",
+        "size": 18,
+        "interval": 3,
+        "tooltip": false
+    },
+
+    "mpris": {
+        "player": "spotify",
+        "format": "{player_icon} {dynamic}",
+        "format-paused": "{status_icon} <i>{dynamic}</i>",
+        "dynamic-order": ["artist", "title"],
+        "dynamic-len": 60,
+        "player-icons": { "default": "󰓇" },
+        "status-icons": { "paused": "󰏤" },
+        "tooltip-format": "{player}: {artist} - {title} ({album})\n{position} / {length}"
+    },
+
+    "custom/cava": {
+        "exec": "~/.config/waybar/scripts/cava.sh",
+        "on-click": "~/.config/waybar/scripts/cava-open.sh",
+        "format": "{}",
+        "tooltip": false
+    },
+
+    "group/spotify": {
+        "orientation": "horizontal",
+        "modules": [
+            "mpris",
+            "image#spotify-cover",
+            "custom/cava"
+        ]
+    },
+
+    "group/cpu": {
+        "orientation": "horizontal",
+        "modules": [
+            "cpu",
+            "temperature"
+        ]
+    },
+
+    "group/audio": {
+        "orientation": "horizontal",
+        "modules": [
+            "pulseaudio#microphone",
+            "pulseaudio"
+        ]
+    },
+
+    "group/hw": {
+        "orientation": "horizontal",
+        "modules": [
+            "bluetooth",
+            "backlight",
+            "network"
+        ]
+    }
+}

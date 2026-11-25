@@ -1,0 +1,98 @@
+[global]
+    ### Display ###
+    monitor = 0
+    follow = mouse
+
+    ### Geometry ###
+    # Half of the 1920px eDP-1 width: a card grows to 960px before it wraps.
+    width = (300, 960)
+    height = 300
+    origin = top-right
+    offset = 12x12
+    scale = 0
+    notification_limit = 5
+
+    ### Progress bar ###
+    progress_bar = true
+    progress_bar_height = 8
+    progress_bar_frame_width = 1
+    progress_bar_min_width = 150
+    progress_bar_max_width = 300
+    progress_bar_corner_radius = 4
+
+    indicate_hidden = yes
+    transparency = 10
+    separator_height = 2
+    padding = 10
+    horizontal_padding = 14
+    text_icon_padding = 10
+    frame_width = 2
+    frame_color = "#3f4948"
+    gap_size = 6
+    separator_color = frame
+    sort = yes
+    corner_radius = 8
+
+    ### Text ###
+    font = Hack Nerd Font 11
+    line_height = 2
+    markup = full
+    format = "<b>%a</b>  %s\n%b"
+    alignment = left
+    vertical_alignment = center
+    show_age_threshold = 60
+    ellipsize = middle
+    ignore_newline = no
+    stack_duplicates = true
+    hide_duplicate_count = false
+    show_indicators = yes
+
+    ### Icons ###
+    enable_recursive_icon_lookup = true
+    icon_theme = Adwaita, hicolor
+    icon_position = left
+    min_icon_size = 32
+    max_icon_size = 64
+
+    ### History ###
+    sticky_history = yes
+    history_length = 30
+
+    ### Misc ###
+    dmenu = /usr/bin/dmenu -p dunst:
+    browser = /usr/bin/xdg-open
+    always_run_script = true
+    title = Dunst
+    class = Dunst
+    force_xwayland = false
+    force_xinerama = false
+    ignore_dbusclose = false
+
+    ### Mouse ###
+    mouse_left_click = close_current
+    mouse_middle_click = do_action, close_current
+    mouse_right_click = close_all
+
+[experimental]
+    per_monitor_dpi = false
+
+[urgency_low]
+    background = "#1a2120"
+    foreground = "#bec9c7"
+    frame_color = "#3f4948"
+    highlight = "#80d5d1"
+    timeout = 8
+
+[urgency_normal]
+    background = "#0e1514"
+    foreground = "#dde4e3"
+    frame_color = "#80d5d1"
+    highlight = "#9cf1ee"
+    timeout = 15
+
+[urgency_critical]
+    background = "#1a2120"
+    foreground = "#dde4e3"
+    frame_color = "#ffb4ab"
+    highlight = "#ff5449"
+    timeout = 0

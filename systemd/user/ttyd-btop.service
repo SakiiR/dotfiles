@@ -1,0 +1,11 @@
+[Unit]
+Description=btop in browser via ttyd
+After=network.target btop-session.service
+Requires=btop-session.service
+
+[Service]
+ExecStart=/usr/bin/ttyd --interface 127.0.0.1 --port 7682 tmux new-session -A -s btop /usr/bin/btop
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

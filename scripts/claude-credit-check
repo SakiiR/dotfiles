@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Shared notification style: palette, meter, rows, notify-send wrapper.
+# This script is where the style started; ~/.local/lib/notify-style.sh now holds it
+# so battery-check, check-update and startup.sh render the same cards.
+source "$HOME/.local/lib/notify-style.sh"
+n_prepare_env
+
+# The cron runs every 20 minutes, but a card is only worth showing when the credit
+# crosses into a new band — the same state-file pattern as ~/.local/bin/battery-check.
+# `--force` shows the current reading whatever the band, for a manual check.
+FORCE=0
+[[ "${1-}" == "--force" || "${1-}" == "-f" ]] && FORCE=1
+
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/claude-credit"
+STATE_FILE="$CACHE/last_band"
+
+# `/usage` is computed locally from this machine's sessions: no API call, no quota cost
+USAGE=$(claude -p "/usage" 2>/dev/null) || exit 0
+
+# Current session: 12% used · resets Aug 5, 3:20pm (Europe/Paris)
+# Current week (all models): 2% used · resets Aug 12, 1am (Europe/Paris)
+# Current week (Fable): 0% used · resets Aug 12, 1am (Europe/Paris)   <- premium plans only
+SESSION_USED=$(grep -m1 -oP '^Current session: \K[0-9]+' <<< "$USAGE" || true)
+WEEK_USED=$(grep -m1 -oP '^Current week \(all models\): \K[0-9]+' <<< "$USAGE" || true)
+SESSION_RESET=$(grep -m1 -oP '^Current session:.* resets \K[^(]+' <<< "$USAGE" | xargs || true)
+WEEK_RESET=$(grep -m1 -oP '^Current week \(all models\):.* resets \K[^(]+' <<< "$USAGE" | xargs || true)
+
+# The per-model weekly window, when the plan has one
+MODEL_LINE=$(grep -m1 -P '^Current week \((?!all models\))[^)]+\): [0-9]+% used' <<< "$USAGE" || true)
+MODEL_NAME=$(grep -oP '^Current week \(\K[^)]+' <<< "$MODEL_LINE" || true)
+MODEL_USED=$(grep -oP '\): \K[0-9]+' <<< "$MODEL_LINE" || true)
+MODEL_RESET=$(grep -oP ' resets \K[^(]+' <<< "$MODEL_LINE" | xargs || true)
+
+# Nothing to report on API-key billing, or the output format changed
+[[ -n "$SESSION_USED" && -n "$WEEK_USED" ]] || exit 0
+
+SESSION_LEFT=$(( 100 - SESSION_USED ))
+WEEK_LEFT=$(( 100 - WEEK_USED ))
+
+# The band follows whichever window is closest to exhaustion
+if (( SESSION_LEFT < WEEK_LEFT )); then
+  LOWEST=$SESSION_LEFT
+  DRIVER=Session
+else
+  LOWEST=$WEEK_LEFT
+  DRIVER=Week
+fi
+if [[ -n "$MODEL_USED" ]]; then
+  MODEL_LEFT=$(( 100 - MODEL_USED ))
+  if (( MODEL_LEFT < LOWEST )); then
+    LOWEST=$MODEL_LEFT
+    DRIVER=$MODEL_NAME
+  fi
+fi
+
+# Format: min|max|label|urgency. The top band stays quiet: plenty left is not news.
+BANDS=(
+  "76|100|quiet|quiet"
+  "51|75|Credit below 75%|low"
+  "26|50|Credit below 50%|normal"
+  "11|25|Credit running low|critical"
+  "0|10|Credit nearly spent|critical"
+)
+
+BAND=""
+LABEL=""
+URGENCY=""
+
+for b in "${BANDS[@]}"; do
+  IFS='|' read -r MIN MAX B_LABEL B_URGENCY <<< "$b"
+  if (( LOWEST >= MIN && LOWEST <= MAX )); then
+    BAND="$MIN-$MAX"
+    LABEL="$B_LABEL"
+    URGENCY="$B_URGENCY"
+    break
+  fi
+done
+
+[[ -z "$BAND" ]] && exit 0
+
+mkdir -p "$CACHE"
+
+LAST_BAND=""
+[[ -f "$STATE_FILE" ]] && LAST_BAND=$(<"$STATE_FILE")
+
+# Record the band first, so a band the user climbs back out of — after a window
+# resets, the credit goes back up and lands in the quiet band — arms the next card.
+echo "$BAND" > "$STATE_FILE"
+
+if (( ! FORCE )); then
+  [[ "$BAND" == "$LAST_BAND" ]] && exit 0
+  [[ "$URGENCY" == "quiet" ]] && exit 0
+fi
+
+# A forced reading in the quiet band still needs something to show
+if [[ "$URGENCY" == "quiet" ]]; then
+  LABEL="Credit comfortable"
+  URGENCY="low"
+fi
+
+ACCENT=$(n_colour_for "$LOWEST")
+GLYPH="$N_GLYPH_INFO"
+(( LOWEST <= 25 )) && GLYPH="$N_GLYPH_WARN"
+
+# Row 1 — the band that was crossed, and which window drove it. Next rows —
+# one padded meter per limit window: label, meter, percentage, reset time.
+ROWS=(
+  "$(n_head_row "$GLYPH" "$ACCENT" "$LABEL" "$(n_span "· $DRIVER" "$N_DIM")")"
+  "$(n_meter_row Session "$SESSION_LEFT" "resets $SESSION_RESET")"
+  "$(n_meter_row Week "$WEEK_LEFT" "resets $WEEK_RESET")"
+)
+[[ -n "$MODEL_USED" ]] && ROWS+=("$(n_meter_row "$MODEL_NAME" "$MODEL_LEFT" "resets $MODEL_RESET")")
+BODY=$(n_body "${ROWS[@]}")
+
+# Sticky once it is critical: it has to survive being missed. The stack tag replaces
+# the previous reading rather than piling them up, so at most one is ever waiting.
+TIMEOUT=15000
+[[ "$URGENCY" == "critical" ]] && TIMEOUT=0
+
+n_notify "Claude Code" "claude-code" "$URGENCY" "$TIMEOUT" "claude-credit" \
+  "credit remaining" \
+  "$BODY"

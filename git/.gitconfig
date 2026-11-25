@@ -1,0 +1,9 @@
+# Identity (name, email) lives in ~/.gitconfig.local, kept out of the dotfiles repo.
+[include]
+	path = ~/.gitconfig.local
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential

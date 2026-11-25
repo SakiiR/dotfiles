@@ -1,0 +1,3 @@
+* * * * * ~/.local/bin/battery-check
+0 * * * * ~/.local/bin/check-update
+*/20 * * * * ~/.local/bin/claude-credit-check

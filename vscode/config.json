@@ -1,0 +1,367 @@
+{
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "editor.unicodeHighlight.ambiguousCharacters": false,
+  "editor.insertSpaces": true,
+  "editor.smoothScrolling": true,
+  "editor.fontLigatures": "'calt', 'liga', 'dlig', 'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'ss07', 'ss08'",
+  "editor.fontVariations": true,
+  "editor.fontFamily": "Fira Code",
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "keyword",
+        "settings": {
+          "fontStyle": "bold"
+        }
+      },
+      {
+        "scope": "storage",
+        "settings": {
+          "fontStyle": "italic"
+        }
+      },
+      {
+        "scope": "constant.language",
+        "settings": {
+          "fontStyle": "bold"
+        }
+      },
+      {
+        "scope": "support.class.builtin",
+        "settings": {
+          "fontStyle": "bold underline"
+        }
+      },
+      {
+        "scope": "entity.name.function",
+        "settings": {
+          "fontStyle": "bold"
+        }
+      },
+      {
+        "scope": "invalid.deprecated",
+        "settings": {
+          "fontStyle": "bold strikethrough"
+        }
+      }
+    ]
+  },
+  "vim.normalModeKeyBindings": [
+    {
+      "before": [
+        "g",
+        "p",
+        "d"
+      ],
+      "commands": [
+        "editor.action.peekDefinition"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "h"
+      ],
+      "commands": [
+        "editor.action.showDefinitionPreviewHover"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "i"
+      ],
+      "commands": [
+        "editor.action.goToImplementation"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "p",
+        "i"
+      ],
+      "commands": [
+        "editor.action.peekImplementation"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "q"
+      ],
+      "commands": [
+        "editor.action.quickFix"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "r"
+      ],
+      "commands": [
+        "editor.action.referenceSearch.trigger"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "t"
+      ],
+      "commands": [
+        "editor.action.goToTypeDefinition"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "p",
+        "t"
+      ],
+      "commands": [
+        "editor.action.peekTypeDefinition"
+      ]
+    }
+  ],
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "<C-j>"
+      ],
+      "after": [
+        "}"
+      ]
+    },
+    {
+      "before": [
+        "<C-k>"
+      ],
+      "after": [
+        "{"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "e"
+      ],
+      "commands": [
+        "workbench.view.explorer"
+      ]
+    }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "<C-j>"
+      ],
+      "after": [
+        "}"
+      ]
+    },
+    {
+      "before": [
+        "<C-k>"
+      ],
+      "after": [
+        "{"
+      ]
+    }
+  ],
+  "vim.handleKeys": {
+    "<C-w>": false,
+    "<C-a>": false,
+    "<C-f>": false,
+    "<C-p>": false,
+    "<C-n>": false
+  },
+  "vim.highlightedyank.enable": true,
+  "vim.highlightedyank.color": "#a9dc7660",
+  "vim.highlightedyank.duration": 250,
+  "vim.useSystemClipboard": true,
+  "vim.statusBarColorControl": false,
+  "editor.cursorSurroundingLines": 8,
+  "vim.smartRelativeLine": true,
+  "workbench.list.smoothScrolling": true,
+  "git.pullTags": false,
+  "editor.formatOnType": true,
+  "git.autofetch": true,
+  "gitlens.views.tags.branches.layout": "list",
+  "gitlens.views.branches.branches.layout": "list",
+  "git.confirmSync": false,
+  "python.analysis.completeFunctionParens": true,
+  "git.enableSmartCommit": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "security.workspace.trust.untrustedFiles": "open",
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.git": false
+  },
+  "editor.formatOnSave": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "[sql]": {
+    "editor.formatOnSave": false
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "mypy.runUsingActiveInterpreter": true,
+  "cSpell.userWords": [
+    "alexa",
+    "apikey",
+    "astext",
+    "astype",
+    "autoflush",
+    "automark",
+    "autorollback",
+    "bgettext",
+    "cookiesalt",
+    "cpes",
+    "creatables",
+    "criticity",
+    "CVECPE",
+    "cves",
+    "dacite",
+    "dataframe",
+    "dataframes",
+    "datascan",
+    "dateutil",
+    "debugtoolbar",
+    "domcontentloaded",
+    "epss",
+    "excinst",
+    "Excludable",
+    "exctb",
+    "exctype",
+    "exploitability",
+    "fastapi",
+    "firebounty",
+    "fprompts",
+    "fqdns",
+    "getservbyname",
+    "getservbyport",
+    "healthcheck",
+    "healthchecks",
+    "hostnames",
+    "ilike",
+    "innerprocessors",
+    "isin",
+    "isna",
+    "isodate",
+    "iterrows",
+    "jsonlogger",
+    "jsonschema",
+    "keypair",
+    "maxscantime",
+    "maxsplit",
+    "minictf",
+    "modelview",
+    "modname",
+    "mypy",
+    "nettype",
+    "nmap",
+    "noscan",
+    "notna",
+    "Nslookup",
+    "ONDEMAND",
+    "onupdate",
+    "ONYPHE",
+    "pentest",
+    "pinauth",
+    "pinsalt",
+    "portstr",
+    "Postg",
+    "prefixlen",
+    "prioritizer",
+    "productvendor",
+    "productversion",
+    "Purplemet",
+    "pydantic",
+    "pythonjsonlogger",
+    "rescan",
+    "Sakii",
+    "sakiir",
+    "secreq",
+    "SECTRAILS",
+    "Securitytrails",
+    "Sekhost",
+    "Sekost",
+    "sessionmaker",
+    "setrecursionlimit",
+    "signale",
+    "SIGTERM",
+    "softdelete",
+    "sqlalchemy",
+    "sqltypes",
+    "supersecretuser",
+    "synscan",
+    "tdelta",
+    "typer",
+    "unarchiving",
+    "Uploadify",
+    "urandom",
+    "urlscan",
+    "uvicorn",
+    "vfeed",
+    "vulnpedia",
+    "vulnscan",
+    "werkzeug",
+    "whois",
+    "zerodisclo"
+  ],
+  "[python]": {
+    "editor.formatOnType": true,
+    "editor.codeActionsOnSave": {
+      "source.unusedImports": "explicit"
+    },
+  },
+  "terminal.integrated.env.linux": {},
+  "terminal.integrated.env.windows": {},
+  "gitlens.remotes": [
+    {
+      "domain": "git.clacos.ninja",
+      "type": "GitLab"
+    }
+  ],
+  "terminal.integrated.fontFamily": "Monaspace Krypton",
+  "terminal.integrated.persistentSessionScrollback": 10000,
+  "terminal.integrated.scrollback": 10000,
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  },
+  "workbench.colorTheme": "Andromeda",
+  "python.analysis.typeCheckingMode": "basic",
+  "go.toolsManagement.autoUpdate": true,
+  "atlascode.rovodev.showEntitlementNotifications": false,
+  "gitlens.ai.generateCommitMessage.customInstructions": "To generate the prompt, make sure you follow conventional-commit and add the jira issue number as prefix. Example: PROJ-123 feat(auth): the commit message. Where feat is the type fix, docs, etc as described in https://www.conventionalcommits.org. You can retrieve the jira issue number from the current branch name. types other than fix: and feat: are allowed, for example @commitlint/config-conventional (based on the Angular convention) recommends build:, chore:, ci:, docs:, style:, refactor:, perf:, test:, and others.",
+  "gitlens.ai.model": "anthropic:claude-3-5-sonnet-latest",
+  "files.insertFinalNewline": true,
+  "docker.extension.enableComposeLanguageServer": false,
+  "git.ignoreRebaseWarning": true,
+  "python.languageServer": "Default",
+  "ty.completions.autoImport": true,
+  "files.watcherExclude": {
+    "**/.venv/**": true,
+    "**/node_modules/**": true,
+    "**/.mypy_cache/**": true,
+    "**/.ruff_cache/**": true,
+    "**/__pycache__/**": true
+  }
+}

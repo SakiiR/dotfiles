@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Shared notification style: palette, rows, notify-send wrapper.
+# Same look as ~/.local/bin/claude-credit-check.
+source "$HOME/.local/lib/notify-style.sh"
+n_prepare_env
+
+MAX_DISPLAYED="${CHECK_UPDATE_MAX_PACKAGES:-7}"
+LOG_FILE="${CHECK_UPDATE_LOG:-${HOME}/.local/share/check-update.log}"
+
+# Phased updates show in `apt list --upgradable`, but `apt upgrade` holds them back.
+# Take the deferred names from a dry run and drop them from the list.
+mapfile -t PHASED < <(LANG=C apt-get -s upgrade 2>/dev/null \
+    | sed -n '/deferred due to phasing:/,/^[^ ]/{/^ /p}' | tr -s ' ' '\n' | grep -v '^$' || true)
+
+PKG_LINES=()
+while IFS= read -r line; do
+    name="${line%%/*}"
+    [[ " ${PHASED[*]} " == *" $name "* ]] && continue
+    PKG_LINES+=("$line")
+done < <(apt list --upgradable 2>/dev/null | grep "/" || true)
+UPDATES="${#PKG_LINES[@]}"
+
+# `--waybar`: print the count as waybar JSON (custom/updates) and skip the notification.
+if [[ "${1:-}" == "--waybar" ]]; then
+    if (( UPDATES == 0 )); then
+        jq -cn '{text: "󰗠 0", tooltip: "System up to date", class: "uptodate"}'
+    else
+        tip=""
+        for pkg in "${PKG_LINES[@]}"; do
+            tip+="${pkg%%/*}  $(awk '{print $2}' <<< "$pkg")"$'\n'
+        done
+        tip=$(n_escape "${tip%$'\n'}")
+        jq -cn --arg n "$UPDATES" --arg tip "$tip" \
+            '{text: ("󰏗 " + $n), tooltip: ("<b>" + $n + " update(s)</b> · click to upgrade\n<tt>" + $tip + "</tt>"), class: "pending"}'
+    fi
+    exit 0
+fi
+
+# The log keeps the plain-text history; the notification carries the markup.
+emit() {
+    local title="$1" body="$2"
+    printf '[%s] %s\n%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$title" "$body"
+    printf '[%s] %s\n%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$title" "$body" >> "$LOG_FILE"
+}
+
+if [[ "$UPDATES" -eq 0 ]]; then
+    emit "System up to date" "No update available"
+    BODY=$(n_body \
+        "$(n_head_row "$N_GLYPH_OK" "$N_GREEN" "No update available" "$(n_span "· apt" "$N_DIM")")" \
+        "$(n_dim_row "$LOG_FILE")")
+    n_notify "Updates" "system-uptodate" "low" 8000 "system-updates" \
+        "system up to date" "$BODY"
+    exit 0
+fi
+
+# Row 1 — the count. Rows 2..n — one package per row, old version dim, new one blue.
+PKG_WORD="package"
+(( UPDATES > 1 )) && PKG_WORD="packages"
+
+ROWS=("$(n_head_row "$N_GLYPH_BOX" "$N_BLUE" "$UPDATES $PKG_WORD" \
+    "$(n_span "· apt upgrade" "$N_DIM")")")
+
+PLAIN=""
+for pkg in "${PKG_LINES[@]:0:$MAX_DISPLAYED}"; do
+    name="${pkg%%/*}"
+    new_ver=$(awk '{print $2}' <<< "$pkg")
+    old_ver=$(grep -oP '(?<=upgradable from: )[^\]]+' <<< "$pkg" || true)
+    PLAIN+="• $name: ${old_ver:-?} → $new_ver"$'\n'
+    # The distro suffix (`~ubuntu.24.04~noble`) says nothing here and wraps the row
+    # onto three lines, so the notification keeps the upstream part only. The log
+    # above still has the full versions.
+    old_short="${old_ver:-?}"
+    old_short="${old_short%%\~*}"
+    new_short="${new_ver%%\~*}"
+    # Two spaces of indent: the head row starts with a double-width Nerd Font glyph.
+    ROWS+=("$(printf '<tt>  %s  %s %s %s</tt>' \
+        "$(n_escape "$name")" \
+        "$(n_span "$(n_escape "$old_short")" "$N_DIM")" \
+        "$(n_span "→" "$N_DIM")" \
+        "$(n_span "$(n_escape "$new_short")" "$N_BLUE")")")
+done
+
+REMAINING=$(( UPDATES - MAX_DISPLAYED ))
+if (( REMAINING > 0 )); then
+    PLAIN+="…and $REMAINING more"$'\n'
+    ROWS+=("$(n_dim_row "   +$REMAINING more in the log")")
+fi
+
+ROWS+=("$(n_dim_row "$LOG_FILE")")
+BODY=$(n_body "${ROWS[@]}")
+
+emit "$UPDATES update(s) available" "${PLAIN%$'\n'}"
+
+# Not urgent enough to be sticky: it comes back every hour anyway. The stack tag
+# replaces the previous reading rather than stacking one card per hour.
+n_notify "Updates" "system-updates" "normal" 15000 "system-updates" \
+    "$UPDATES update(s) available" "$BODY"

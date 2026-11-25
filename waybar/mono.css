@@ -1,0 +1,199 @@
+* {
+    font-family: "Hack Nerd Font Propo", "Hack Nerd Font", monospace;
+    font-size: 13px;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background: none;
+    background-color: rgba(0, 0, 0, 0);
+    color: #dde4e3;
+}
+
+tooltip {
+    background-color: #1a2120;
+    border: 1px solid #3f4948;
+    color: #dde4e3;
+    border-radius: 4px;
+}
+
+tooltip label {
+    color: #dde4e3;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background: transparent;
+    padding: 4px 6px;
+}
+
+#workspaces,
+#clock,
+#memory,
+#disk,
+#battery,
+#network,
+#custom-spotify,
+#custom-weather,
+#custom-pacman,
+#custom-cava,
+#custom-docker,
+#custom-claude,
+#custom-updates,
+#custom-separator,
+#window {
+    background: transparent;
+    border-radius: 0px;
+    padding: 2px 10px;
+    margin: 3px 2px;
+}
+
+/* ── group/cpu island ──────────────────────────────────────── */
+#cpu {
+    background: transparent;
+    border-radius: 0px;
+    padding: 2px 4px;
+    margin: 3px 2px;
+}
+
+#cpu * {
+    background: transparent;
+    border-radius: 0;
+    margin: 0;
+    padding: 2px 6px;
+}
+
+/* ── group/hw + group/audio islands ───────────────────────────────────────── */
+#hw,
+#audio {
+    background: transparent;
+    border-radius: 0px;
+    padding: 2px 4px;
+    margin: 3px 2px;
+}
+
+#hw *,
+#audio * {
+    background: transparent;
+    border-radius: 0;
+    margin: 0;
+    padding: 2px 6px;
+}
+
+/* ── Workspaces ────────────────────────────────────────────── */
+#workspaces {
+    background: transparent;
+    border-radius: 0px;
+    padding: 0 4px;
+}
+
+#workspaces button {
+    background: transparent;
+    color: #bec9c7;
+    padding: 2px 6px;
+    margin: 1px 0px;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    box-shadow: none;
+    min-width: 0;
+}
+
+#workspaces button:hover {
+    background: transparent;
+    color: #dde4e3;
+    box-shadow: none;
+}
+
+#workspaces button.empty {
+    color: #bec9c7;
+    opacity: 0.4;
+}
+
+#workspaces button.active {
+    color: #003736;
+    opacity: 1;
+    background: linear-gradient(to right, #80d5d1, #4ddad6);
+    border-radius: 0px;
+    padding: 2px 6px;
+}
+
+#workspaces button.urgent {
+    color: #ffb4ab;
+    border-bottom: 2px solid #ffb4ab;
+}
+
+#workspaces button:focus {
+    box-shadow: none;
+    background: transparent;
+}
+
+/* ── Foreground colors ─────────────────────────────────────── */
+#window             { color: #dde4e3; }
+#clock              { color: #9cf1ee; }
+#cpu                { color: #b1c8e8; }
+#memory             { color: #80d5d1; }
+#temperature        { color: #b0ccca; }
+#temperature.critical { color: #ffb4ab; }
+#disk               { color: #b1c8e8; }
+#backlight          { color: #bec9c7; }
+#battery            { color: #80d5d1; }
+#battery.charging,
+#battery.plugged    { color: #9cf1ee; }
+#battery.warning:not(.charging)  { color: #b1c8e8; }
+#battery.critical:not(.charging) {
+    color: #ffb4ab;
+    animation: blink 0.5s step-end infinite alternate;
+}
+
+@keyframes blink {
+    to { color: transparent; }
+}
+
+#network                { color: #80d5d1; }
+#network.disconnected   { color: #ffb4ab; }
+#pulseaudio             { color: #b1c8e8; }
+#pulseaudio.muted       { color: #3f4948; }
+#pulseaudio-microphone          { color: #b1c8e8; }
+#pulseaudio-microphone.muted    { color: #ffb4ab; }
+#custom-spotify     { color: #4ddad6; }
+#custom-cava        { color: #4ddad6; padding: 2px 4px; }
+#custom-weather     { color: #9cf1ee; }
+#custom-pacman      { color: #dde4e3; }
+#custom-docker              { color: #b1c8e8; }
+#custom-updates             { color: #3f4948; }
+#custom-claude              { color: #d97757; }
+#custom-claude.warning      { color: #ffb86c; }
+#custom-claude.critical     { color: #ffb4ab; }
+#custom-claude.stale        { color: #3f4948; }
+#custom-updates.pending     { color: #ffb4ab; }
+
+#custom-separator {
+    color: #3f4948;
+    background: transparent;
+    padding: 0 2px;
+    margin: 0;
+}
+
+scrollbar {
+    background: transparent;
+}
+
+/* ── Bluetooth ─────────────────────────────────────────────── */
+#bluetooth            { color: #b1c8e8; }
+#bluetooth.connected  { color: #80d5d1; }
+#bluetooth.off,
+#bluetooth.disabled   { color: #3f4948; }
+
+/* ── Bottom bar: more breathing room between items ─────────── */
+window#waybar.bottom #cpu *,
+window#waybar.bottom #hw * {
+    padding: 2px 18px;
+}
+
+#mpris              { color: #1db954; padding: 0 0 0 6px; }
+#mpris.paused       { color: #3f4948; }
+#image.spotify-cover { margin: 0 0 0 8px; }

@@ -1,0 +1,21 @@
+#!/bin/bash
+# Window switcher for niri using fuzzel
+# Equivalent of: rofi -show window
+
+windows_json=$(niri msg --json windows 2>/dev/null)
+if [ -z "$windows_json" ]; then
+  exit 1
+fi
+
+# Each entry uses \0icon\x1f<app_id> so fuzzel shows the app icon in dmenu mode
+selected=$(echo "$windows_json" | \
+  jq -r '.[] | [(.app_id // "?"), (.title // "(no title)"), (.id | tostring), (.app_id // "")] | join("\t")' | \
+  while IFS=$'\t' read -r app_id title id icon_name; do
+    printf "%-25s  %s\t%s\0icon\x1f%s\n" "$app_id" "$title" "$id" "$icon_name"
+  done | \
+  fuzzel --dmenu --prompt="  " --match-mode=exact | \
+  awk -F'\t' '{print $2}')
+
+if [ -n "$selected" ]; then
+  niri msg action focus-window --id "$selected"
+fi
